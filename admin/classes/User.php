@@ -341,49 +341,39 @@ class User {
         return $stmt->fetch();
     }
     
-    // Adicionar créditos a um usuário
-    public function addCredits($userId, $amount, $description = '') {
-        try {
-            if ($amount == 0) {
-                return ['success' => false, 'message' => 'A quantidade de créditos deve ser maior que zero'];
-            }
-            
-            // Atualizar créditos do usuário
-            $stmt = $this->db->prepare("UPDATE usuarios SET credits = credits + ? WHERE id = ?");
-            $stmt->execute([$amount, $userId]);
-            
-            // Registrar a transação
-            $creditTransaction = new CreditTransaction();
-            $creditTransaction->recordTransaction(
-                $userId, 
-                'admin_add', 
-                $amount, 
-                $description ?: ($amount > 0 
-                    ? "Adição manual de " . abs($amount) . " créditos" 
-                    : "Remoção manual de " . abs($amount) . " créditos"
-                ),
-                null,
-                null
-            );
-            
-            return ['success' => true, 'message' => $amount > 0 
-                ? abs($amount) . " créditos adicionados com sucesso" 
-                : abs($amount) . " créditos removidos com sucesso"];
-        } catch (PDOException $e) {
-            error_log("Erro ao adicionar/remover créditos: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Erro ao adicionar/remover créditos: ' . $e->getMessage()];
+// Adicionar créditos a um usuário
+public function addCredits($userId, $amount, $description = '') {
+    try {
+        if ($amount == 0) {
+            return ['success' => false, 'message' => 'A quantidade de créditos deve ser maior que zero'];
         }
+
+        // Atualizar créditos do usuário
+        $stmt = $this->db->prepare("UPDATE usuarios SET credits = credits + ? WHERE id = ?");
+        $stmt->execute([$amount, $userId]);
+
+        // Registrar a transação
+        $creditTransaction = new CreditTransaction();
+        $creditTransaction->recordTransaction(
+            $userId,
+            'admin_add',
+            $amount,
+            $description ?: ($amount > 0 
+                ? "Adição manual de " . abs($amount) . " créditos"
+                : "Remoção manual de " . abs($amount) . " créditos"
+            ),
+            null,
+            null
+        );
+
+        return ['success' => true, 'message' => $amount > 0 
+            ? abs($amount) . " créditos adicionados com sucesso" 
+            : abs($amount) . " créditos removidos com sucesso"];
+    } catch (PDOException $e) {
+        error_log("Erro ao adicionar/remover créditos: " . $e->getMessage());
+        return ['success' => false, 'message' => 'Erro ao adicionar/remover créditos: ' . $e->getMessage()];
     }
-                null,
-                null
-            );
-            
-            return ['success' => true, 'message' => "{$amount} créditos adicionados com sucesso"];
-        } catch (PDOException $e) {
-            error_log("Erro ao adicionar créditos: " . $e->getMessage());
-            return ['success' => false, 'message' => 'Erro ao adicionar créditos: ' . $e->getMessage()];
-        }
-    }
+}
     
     // Deduzir créditos de um usuário
     public function deductCredits($userId, $amount) {
