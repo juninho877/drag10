@@ -664,8 +664,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
                 color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
                 inputValidator: (value) => {
-                    if (!value || value < 1) {
-                        return 'Você precisa adicionar pelo menos 1 crédito!';
+                    if (!value || value == 0) {
+                        return 'Você precisa adicionar ou remover pelo menos 1 crédito!';
                     }
                 }
             }).then((result) => {
@@ -709,7 +709,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function deleteUser(userId) {
-        fetch('../user_management.php', {
+        fetch('../admin/user_management.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -741,7 +741,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function addCredits(userId, credits) {
-        fetch('../user_management.php', {
+        fetch('../admin/user_management.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
