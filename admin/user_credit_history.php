@@ -178,7 +178,7 @@ include "includes/header.php";
         <form id="addCreditForm" class="flex items-end gap-4">
             <div class="form-group flex-1 mb-0">
                 <label for="credit_amount" class="form-label">Quantidade de Créditos</label>
-                <input type="number" id="credit_amount" name="credit_amount" class="form-input" min="1" value="1" required>
+                <input type="number" id="credit_amount" name="credit_amount" class="form-input" value="1" required>
             </div>
             <div class="form-group flex-1 mb-0">
                 <label for="credit_description" class="form-label">Descrição (opcional)</label>

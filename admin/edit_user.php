@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             Swal.fire({
                 title: 'Confirmar Ação',
-                text: `Deseja ${statusText} este usuário?`,
+                text: creditAmount > 0 ? `Deseja adicionar ${Math.abs(creditAmount)} créditos para este usuário?` : `Deseja remover ${Math.abs(creditAmount)} créditos deste usuário?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Sim, ' + statusText,
