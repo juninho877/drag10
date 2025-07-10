@@ -348,27 +348,36 @@ class User {
                 return ['success' => false, 'message' => 'A quantidade de créditos deve ser maior que zero'];
             }
             
-            $this->db->beginTransaction();
-            
-            $stmt = $this->db->prepare("UPDATE usuarios SET credits = credits + ? WHERE id = ?");
-            $stmt->execute([$amount, $userId]);
-            
-            // Registrar a transação
-            $creditTransaction = new CreditTransaction();
-            $creditTransaction->recordTransaction(
-                $userId,
-                'admin_add',
-                $amount,
-                $description ?: "Adição manual de {$amount} créditos",
-                null,
-                null
-            );
-            
-            $this->db->commit();
-            
-            return ['success' => true, 'message' => "{$amount} créditos adicionados com sucesso"];
+            $transactionStarted = false;
+            try {
+                $this->db->beginTransaction();
+                $transactionStarted = true;
+                
+                $stmt = $this->db->prepare("UPDATE usuarios SET credits = credits + ? WHERE id = ?");
+                $stmt->execute([$amount, $userId]);
+                
+                // Registrar a transação
+                $creditTransaction = new CreditTransaction();
+                $creditTransaction->recordTransaction(
+                    $userId,
+                    'admin_add',
+                    $amount,
+                    $description ?: "Adição manual de {$amount} créditos",
+                    null,
+                    null
+                );
+                
+                $this->db->commit();
+                
+                return ['success' => true, 'message' => "{$amount} créditos adicionados com sucesso"];
+            } catch (PDOException $e) {
+                if ($transactionStarted) {
+                    $this->db->rollBack();
+                }
+                error_log("Erro ao adicionar créditos: " . $e->getMessage());
+                return ['success' => false, 'message' => 'Erro ao adicionar créditos: ' . $e->getMessage()];
+            }
         } catch (PDOException $e) {
-            $this->db->rollBack();
             return ['success' => false, 'message' => 'Erro ao adicionar créditos: ' . $e->getMessage()];
         }
     }
