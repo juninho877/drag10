@@ -1,0 +1,6 @@
+{
+  "api_url": "https://restritojogos.cheek.pro",
+  "api_caminho": "jogos.php",
+  "api_token": "c8a503aeee1050058909a3c5e27992e6",
+  "$query_string_base": "j=m&t="
+}
