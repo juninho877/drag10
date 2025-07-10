@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const creditAmount = document.getElementById('credit_amount').value;
             const creditDescription = document.getElementById('credit_description').value;
             
-            if (!creditAmount || creditAmount < 1) {
+            if (!creditAmount || creditAmount == 0) {
                 Swal.fire({
                     title: 'Erro!',
                     text: 'A quantidade de créditos deve ser pelo menos 1',
