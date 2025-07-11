@@ -12,6 +12,7 @@
     overflow: hidden;
     width: 32em;
     max-width: 95vw;
+    text-align: center;
 }
 
 /* Cabeçalho do popup */
@@ -42,7 +43,7 @@
     padding: 2rem;
     font-size: 1rem;
     color: #1e293b;
-    text-align: left;
+    text-align: center;
     line-height: 1.6;
 }
 
@@ -96,7 +97,7 @@
 .modern-popup .swal2-actions {
     margin: 0;
     padding: 0 2rem 2rem;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 /* Tema escuro */
