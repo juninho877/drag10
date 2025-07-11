@@ -383,6 +383,53 @@ class TelegramService {
                 return ['success' => false, 'message' => 'Configurações do Telegram não encontradas. Configure primeiro em Telegram > Configurações.'];
             }
             
+            // Buscar informações adicionais do filme/série (ano de lançamento e categoria)
+            $lancamento = '';
+            $categoria = '';
+            
+            // Tentar obter informações da API TMDB
+            $apiKey = 'ec8237f367023fbadd38ab6a1596b40c';
+            $language = 'pt-BR';
+            $searchType = $contentType == 'serie' ? 'tv' : 'movie';
+            $searchUrl = "https://api.themoviedb.org/3/search/{$searchType}?api_key={$apiKey}&language={$language}&query=" . urlencode($contentName);
+            
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 5,
+                    'user_agent' => 'Mozilla/5.0 (compatible; FutBanner/1.0)'
+                ]
+            ]);
+            
+            $searchResponse = @file_get_contents($searchUrl, false, $context);
+            if ($searchResponse !== false) {
+                $searchData = json_decode($searchResponse, true);
+                if (json_last_error() === JSON_ERROR_NONE && !empty($searchData['results'])) {
+                    $firstResult = $searchData['results'][0];
+                    
+                    // Obter ano de lançamento
+                    if ($searchType === 'movie' && !empty($firstResult['release_date'])) {
+                        $lancamento = substr($firstResult['release_date'], 0, 4);
+                    } elseif ($searchType === 'tv' && !empty($firstResult['first_air_date'])) {
+                        $lancamento = substr($firstResult['first_air_date'], 0, 4);
+                    }
+                    
+                    // Obter ID para buscar detalhes completos
+                    if (!empty($firstResult['id'])) {
+                        $detailsUrl = "https://api.themoviedb.org/3/{$searchType}/{$firstResult['id']}?api_key={$apiKey}&language={$language}";
+                        $detailsResponse = @file_get_contents($detailsUrl, false, $context);
+                        
+                        if ($detailsResponse !== false) {
+                            $detailsData = json_decode($detailsResponse, true);
+                            if (json_last_error() === JSON_ERROR_NONE && !empty($detailsData['genres'])) {
+                                // Extrair categorias/gêneros
+                                $genres = array_column($detailsData['genres'], 'name');
+                                $categoria = implode(', ', $genres);
+                            }
+                        }
+                    }
+                }
+            }
+            
             // Preparar legenda personalizada ou usar padrão
             $caption = "🎬 Banner: " . $contentName . "\n";
             
@@ -395,11 +442,19 @@ class TelegramService {
                 $customMessage = str_replace('$data', $data, $customMessage);
                 $customMessage = str_replace('$hora', $hora, $customMessage);
                 $customMessage = str_replace('$nomedofilme', $contentName, $customMessage);
+                $customMessage = str_replace('$lancamento', $lancamento, $customMessage);
+                $customMessage = str_replace('$categoria', $categoria, $customMessage);
                 
                 $caption = $customMessage;
             } else {
                 // Mensagem padrão
                 $caption .= "📅 Gerado em: " . date('d/m/Y H:i') . "\n";
+                if (!empty($lancamento)) {
+                    $caption .= "🗓️ Lançamento: " . $lancamento . "\n";
+                }
+                if (!empty($categoria)) {
+                    $caption .= "🎭 Gênero: " . $categoria . "\n";
+                }
                 $caption .= "🎨 GeraTop";
             }
             
