@@ -2,6 +2,32 @@
 session_start();
 require_once 'classes/AdminSettings.php';
 
+// Inicializar variáveis para o popup
+$popupEnabled = false;
+$popupMessage = '';
+$popupButtonText = '';
+$popupButtonUrl = '';
+$showPopup = false;
+
+// Verificar se o usuário acabou de fazer login
+if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) {
+    $showPopup = true;
+    
+    // Carregar configurações do popup apenas se necessário
+    require_once 'classes/AdminSettings.php';
+    $adminSettings = new AdminSettings();
+    $popupEnabled = $adminSettings->getSetting('popup_enabled', '0') === '1';
+    
+    if ($popupEnabled) {
+        $popupMessage = $adminSettings->getSetting('popup_message', '');
+        $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
+        $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
+    }
+    
+    // Limpar a flag para que o popup não seja exibido novamente
+    unset($_SESSION['just_logged_in']);
+}
+
 // Definir flag para exibição do popup apenas após login
 $showPopup = false;
 
@@ -31,28 +57,6 @@ $popupButtonText = '';
 $popupButtonUrl = '';
 
 if ($popupEnabled && $showPopup) {
-    $popupMessage = $adminSettings->getSetting('popup_message', '');
-    $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
-    $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
-}
-
-// Obter dados reais dos jogos
-$jogos = obterJogosDeHoje();
-$totalJogosHoje = count($jogos);
-
-// Obter estatísticas de banners
-$bannerStats = new BannerStats();
-
-// Se for admin, mostrar estatísticas globais, senão mostrar apenas do usuário
-if ($_SESSION['role'] === 'admin') {
-    $globalStats = $bannerStats->getGlobalBannerStats();
-    $userBannerStats = $bannerStats->getUserBannerStats($_SESSION['user_id']);
-    $isAdmin = true;
-} else {
-    $userBannerStats = $bannerStats->getUserBannerStats($_SESSION['user_id']);
-    $isAdmin = false;
-}
-
 $pageTitle = "Página Inicial";
 include "includes/header.php"; // Mantém seu header.php original
 ?>
