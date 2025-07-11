@@ -220,6 +220,9 @@ include "includes/header.php";
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label for="scheduled_time" class="form-label">
+                                    <i class="fas fa-hourglass-half mr-2"></i>
                                     Horário de Envio
                                 </label>
                                 <input type="time" id="scheduled_time" name="scheduled_time" class="form-input" 
