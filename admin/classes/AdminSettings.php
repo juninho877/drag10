@@ -67,7 +67,7 @@ class AdminSettings {
     public function setSetting($name, $value) {
         try {
             $stmt = $this->db->prepare("
-                INSERT INTO admin_settings (setting_name, setting_value, created_at) 
+                INSERT INTO admin_settings (setting_name, setting_value) 
                 VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE 
                 setting_value = VALUES(setting_value)
