@@ -18,12 +18,12 @@
 /* Cabeçalho do popup */
 .modern-popup .swal2-title {
     margin: 0;
-    padding: 1.5rem 3rem 1.5rem 1.5rem;
+    padding: 1.5rem;
     font-size: 1.5rem;
     font-weight: 700;
     color: #fff;
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    text-align: left;
+    text-align: center;
     position: relative;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -43,7 +43,7 @@
     padding: 2rem;
     font-size: 1rem;
     color: #1e293b;
-    text-align: center;
+    text-align: center !important;
     line-height: 1.6;
 }
 
@@ -97,7 +97,8 @@
 .modern-popup .swal2-actions {
     margin: 0;
     padding: 0 2rem 2rem;
-    justify-content: center;
+    justify-content: center !important;
+    display: flex !important;
 }
 
 /* Tema escuro */
@@ -135,8 +136,8 @@
 /* Botão de fechar */
 .modern-popup .swal2-close {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 0.75rem;
+    right: 0.75rem;
     color: rgba(255, 255, 255, 0.8);
     font-size: 1.5rem;
     transition: all 0.2s ease;
