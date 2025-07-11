@@ -91,7 +91,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
                 $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
                 
                 // Enviar notificação via Telegram para o administrador
-                $_SESSION["just_logged_in"] = true; // Marcar que o usuário acabou de fazer login
                 TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
             } else {
                 $_SESSION['register_error'] = $result['message'];
