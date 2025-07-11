@@ -266,7 +266,7 @@ include "includes/header.php";
                     <div class="form-group">
                         <div class="flex items-center">
                             <input type="checkbox" id="popup_enabled" name="popup_enabled" class="form-checkbox" 
-                                   <?php echo $popupEnabled ? 'checked' : ''; ?>>
+                                  <?php echo $popupEnabled ? 'checked' : ''; ?>>
                             <label for="popup_enabled" class="ml-2 font-medium">
                                 Ativar popup após o login
                             </label>
@@ -281,7 +281,7 @@ include "includes/header.php";
                             <i class="fas fa-comment-alt mr-2"></i>
                             Mensagem do Popup
                         </label>
-                        <textarea id="popup_message" name="popup_message" class="form-input" rows="4" 
+                        <textarea id="popup_message" name="popup_message" class="form-input" rows="6" 
                                   placeholder="Digite a mensagem que será exibida no popup"><?php echo htmlspecialchars($popupMessage); ?></textarea>
                         <p class="text-xs text-muted mt-1">
                             Você pode usar HTML básico para formatação (negrito, itálico, links, etc.)
@@ -324,7 +324,7 @@ include "includes/header.php";
                     </div>
                     
                     <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" name="save_popup_settings" value="1">
                             <i class="fas fa-save"></i>
                             Salvar Configurações do Popup
                         </button>
@@ -698,8 +698,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 `,
                 showConfirmButton: !buttonHtml,
                 confirmButtonText: 'Fechar',
-                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                customClass: {
+                    container: 'modern-popup',
+                    popup: 'modern-popup-content',
+                    title: 'modern-popup-title',
+                    htmlContainer: 'modern-popup-body',
+                    confirmButton: 'modern-popup-confirm',
+                    backdrop: 'modern-popup-backdrop'
+                },
+                buttonsStyling: false
             });
         });
     }

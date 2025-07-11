@@ -715,6 +715,9 @@ include "includes/header.php"; // Mantém seu header.php original
     </p>
 </div>
 
+<!-- Incluir CSS personalizado para o popup -->
+<link rel="stylesheet" href="css/popup-styles.css">
+
 <?php if ($isAdmin): ?>
     <div class="admin-stats-section mb-6">
         <h2 class="section-title">
@@ -1149,24 +1152,33 @@ document.addEventListener('DOMContentLoaded', function() {
     // Configurar botão (se houver)
     let buttonHtml = '';
     <?php if (!empty($popupButtonText) && !empty($popupButtonUrl)): ?>
-    buttonHtml = `
-        <a href="<?php echo htmlspecialchars($popupButtonUrl); ?>" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 1rem;">
-            <?php echo htmlspecialchars($popupButtonText); ?>
-        </a>
-    `;
+    buttonHtml = `<a href="<?php echo htmlspecialchars($popupButtonUrl); ?>" class="custom-button"><?php echo htmlspecialchars($popupButtonText); ?></a>`;
     <?php endif; ?>
     
     // Mostrar popup
     Swal.fire({
-        title: 'Mensagem do Sistema',
+        title: 'Novidades & Atualizações',
         html: `
             <div><?php echo $popupMessage; ?></div>
             ${buttonHtml}
         `,
         showConfirmButton: <?php echo empty($popupButtonText) ? 'true' : 'false'; ?>,
         confirmButtonText: 'Fechar',
-        background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-        color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+        customClass: {
+            container: 'modern-popup',
+            popup: 'modern-popup-content',
+            title: 'modern-popup-title',
+            htmlContainer: 'modern-popup-body',
+            confirmButton: 'modern-popup-confirm',
+            backdrop: 'modern-popup-backdrop'
+        },
+        buttonsStyling: false,
+        showClass: {
+            popup: 'animate__animated animate__fadeInDown'
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutUp'
+        }
     });
 });
 </script>
