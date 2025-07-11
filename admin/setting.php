@@ -701,11 +701,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 confirmButtonText: 'Fechar',
                 customClass: {
                     container: 'modern-popup',
-                    popup: 'modern-popup-content',
-                    title: 'modern-popup-title',
-                    htmlContainer: 'modern-popup-body',
-                    confirmButton: 'modern-popup-confirm',
-                    backdrop: 'modern-popup-backdrop'
+                    popup: 'swal2-popup',
+                    title: 'swal2-title',
+                    htmlContainer: 'swal2-html-container',
+                    confirmButton: 'swal2-confirm',
+                    closeButton: 'swal2-close',
+                    backdrop: 'swal2-backdrop'
                 },
                 buttonsStyling: false,
                 position: 'center'

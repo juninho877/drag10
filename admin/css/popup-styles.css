@@ -6,6 +6,7 @@
 /* Container principal do popup */
 .modern-popup .swal2-popup {
     padding: 0;
+    text-align: center;
     border-radius: 16px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     border: 1px solid rgba(226, 232, 240, 0.5);
@@ -40,10 +41,10 @@
 /* Conteúdo do popup */
 .modern-popup .swal2-html-container {
     margin: 0;
+    text-align: center !important;
     padding: 2rem;
     font-size: 1rem;
     color: #1e293b;
-    text-align: center !important;
     line-height: 1.6;
 }
 
@@ -96,9 +97,9 @@
 /* Área de botões */
 .modern-popup .swal2-actions {
     margin: 0;
-    padding: 0 2rem 2rem;
-    justify-content: center !important;
     display: flex !important;
+    justify-content: center !important;
+    padding: 0 2rem 2rem;
 }
 
 /* Tema escuro */
@@ -136,8 +137,8 @@
 /* Botão de fechar */
 .modern-popup .swal2-close {
     position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
+    top: 1rem;
+    right: 1rem;
     color: rgba(255, 255, 255, 0.8);
     font-size: 1.5rem;
     transition: all 0.2s ease;
@@ -146,6 +147,7 @@
 .modern-popup .swal2-close:hover {
     color: #fff;
     transform: scale(1.1);
+    background: transparent;
 }
 
 [data-theme="dark"] .modern-popup .swal2-close {
@@ -154,4 +156,5 @@
 
 [data-theme="dark"] .modern-popup .swal2-close:hover {
     color: rgba(255, 255, 255, 0.9);
+    background: transparent;
 }
