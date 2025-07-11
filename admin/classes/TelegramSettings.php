@@ -18,9 +18,10 @@ class TelegramSettings {
      * @param string $scheduledTime Horário agendado para envio automático (formato HH:MM)
      * @param int $scheduledFootballTheme Tema de futebol para envio agendado (1, 2, 3 ou 4)
      * @param bool $scheduledDeliveryEnabled Flag para habilitar/desabilitar envio agendado
+     * @param string $notificationChatId Chat ID para notificações de novos cadastros (apenas para admin)
      * @return array Resultado da operação
      */
-    public function saveSettings($userId, $botToken, $chatId, $footballMessage = null, $movieSeriesMessage = null, $scheduledTime = null, $scheduledFootballTheme = 1, $scheduledDeliveryEnabled = false) {
+    public function saveSettings($userId, $botToken, $chatId, $footballMessage = null, $movieSeriesMessage = null, $scheduledTime = null, $scheduledFootballTheme = 1, $scheduledDeliveryEnabled = false, $notificationChatId = null) {
         try {
             // Validar parâmetros
             if (empty($botToken) || empty($chatId)) {
@@ -47,6 +48,11 @@ class TelegramSettings {
                 $scheduledFootballTheme = 1; // Valor padrão se inválido
             }
             
+            // Validar notification_chat_id (apenas para admin)
+            if (!empty($notificationChatId) && $_SESSION["role"] !== 'admin') {
+                $notificationChatId = null; // Ignorar se não for admin
+            }
+            
             // Criar tabela se não existir
             $this->createTelegramSettingsTable();
             
@@ -59,9 +65,10 @@ class TelegramSettings {
                     movie_series_message,
                     scheduled_time,
                     scheduled_football_theme,
-                    scheduled_delivery_enabled
+                    scheduled_delivery_enabled,
+                    notification_chat_id
                 ) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE 
                 bot_token = VALUES(bot_token), 
                 chat_id = VALUES(chat_id),
@@ -70,6 +77,7 @@ class TelegramSettings {
                 scheduled_time = VALUES(scheduled_time),
                 scheduled_football_theme = VALUES(scheduled_football_theme),
                 scheduled_delivery_enabled = VALUES(scheduled_delivery_enabled),
+                notification_chat_id = VALUES(notification_chat_id),
                 updated_at = CURRENT_TIMESTAMP
             ");
             
@@ -81,7 +89,8 @@ class TelegramSettings {
                 $movieSeriesMessage,
                 $scheduledTime,
                 $scheduledFootballTheme,
-                $scheduledDeliveryEnabled ? 1 : 0
+                $scheduledDeliveryEnabled ? 1 : 0,
+                $notificationChatId
             ]);
             
             return ['success' => true, 'message' => 'Configurações do Telegram salvas com sucesso'];
@@ -110,6 +119,7 @@ class TelegramSettings {
                     scheduled_time,
                     scheduled_football_theme,
                     scheduled_delivery_enabled,
+                    notification_chat_id,
                     created_at, 
                     updated_at 
                 FROM user_telegram_settings 
@@ -139,6 +149,7 @@ class TelegramSettings {
                 scheduled_time VARCHAR(5),
                 scheduled_football_theme INT DEFAULT 1,
                 scheduled_delivery_enabled TINYINT(1) DEFAULT 0,
+               notification_chat_id VARCHAR(50),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 UNIQUE KEY unique_user_telegram (user_id),

@@ -5,6 +5,7 @@ session_start();
 // Incluir as classes necessárias
 require_once 'config/database.php';
 require_once 'classes/User.php';
+require_once 'classes/TelegramNotifier.php';
 
 // Variáveis para o registro
 $registerError = "";
@@ -87,6 +88,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             $result = $user->createUser($userData);
             if ($result['success']) {
                 $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
+                
+                // Enviar notificação via Telegram para o administrador
+                TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
             } else {
                 $_SESSION['register_error'] = $result['message'];
             }

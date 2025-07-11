@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $scheduledTime = trim($_POST['scheduled_time'] ?? '');
                 $scheduledFootballTheme = (int)($_POST['scheduled_football_theme'] ?? 1);
                 $scheduledDeliveryEnabled = isset($_POST['scheduled_delivery_enabled']);
+                $notificationChatId = trim($_POST['notification_chat_id'] ?? '');
                 
                 $result = $telegramSettings->saveSettings(
                     $userId, 
@@ -33,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $movieSeriesMessage,
                     $scheduledTime,
                     $scheduledFootballTheme,
-                    $scheduledDeliveryEnabled
+                    $scheduledDeliveryEnabled,
+                    $notificationChatId
                 );
                 
                 $message = $result['message'];
@@ -202,6 +204,21 @@ include "includes/header.php";
                             <div class="form-group">
                                 <label for="scheduled_time" class="form-label">
                                     <i class="fas fa-hourglass-half mr-2"></i>
+                        <?php if ($_SESSION["role"] === 'admin'): ?>
+                        <div class="form-group">
+                            <label for="notification_chat_id" class="form-label">
+                                <i class="fas fa-bell mr-2"></i>
+                                Chat ID para Notificações de Cadastro
+                            </label>
+                            <input type="text" id="notification_chat_id" name="notification_chat_id" class="form-input" 
+                                   value="<?php echo htmlspecialchars($currentSettings['notification_chat_id'] ?? ''); ?>" 
+                                   placeholder="-1001234567890 ou 123456789">
+                            <p class="text-xs text-muted mt-1">
+                                ID do chat onde serão enviadas notificações de novos cadastros (apenas para administradores)
+                            </p>
+                        </div>
+                        <?php endif; ?>
+                        
                                     Horário de Envio
                                 </label>
                                 <input type="time" id="scheduled_time" name="scheduled_time" class="form-input" 
