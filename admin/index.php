@@ -29,6 +29,7 @@ if ($showPopup) {
 $popupMessage = $adminSettings->getSetting('popup_message', '');
 $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
 $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
+$popupTitle = $adminSettings->getSetting('popup_title', 'Novidades & Atualizações');
 
 // Obter dados reais dos jogos
 $jogos = obterJogosDeHoje();
@@ -1168,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Mostrar popup
     Swal.fire({
-        title: 'Novidades & Atualizações',
+        title: <?php echo json_encode($popupTitle); ?>,
         html: `
             <div><?php echo $popupMessage; ?></div>
             ${buttonHtml}
