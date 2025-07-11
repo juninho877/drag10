@@ -20,12 +20,14 @@ $currentUserData = null;
 // Carregar configurações do popup (apenas para admin)
 $popupEnabled = false;
 $popupMessage = '';
+$popupTitle = '';
 $popupButtonText = '';
 $popupButtonUrl = '';
 
 if ($_SESSION["role"] === 'admin') {
     $popupEnabled = $adminSettings->getSetting('popup_enabled', '0') === '1';
     $popupMessage = $adminSettings->getSetting('popup_message', '');
+    $popupTitle = $adminSettings->getSetting('popup_title', 'Novidades & Atualizações');
     $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
     $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
 }
@@ -46,12 +48,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
     if ($_SESSION["role"] === 'admin' && isset($_POST['save_popup_settings'])) {
         $popupEnabled = isset($_POST['popup_enabled']) ? true : false;
         $popupMessage = trim($_POST['popup_message']);
+        $popupTitle = trim($_POST['popup_title']);
         $popupButtonText = trim($_POST['popup_button_text']);
         $popupButtonUrl = trim($_POST['popup_button_url']);
         
         // Salvar configurações
         $adminSettings->setSetting('popup_enabled', $popupEnabled ? '1' : '0');
         $adminSettings->setSetting('popup_message', $popupMessage);
+        $adminSettings->setSetting('popup_title', $popupTitle);
         $adminSettings->setSetting('popup_button_text', $popupButtonText);
         $adminSettings->setSetting('popup_button_url', $popupButtonUrl);
         
@@ -61,6 +65,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
         // Atualizar variáveis locais para refletir as novas configurações
         $popupEnabled = $adminSettings->getSetting('popup_enabled', '0') === '1';
         $popupMessage = $adminSettings->getSetting('popup_message', '');
+        $popupTitle = $adminSettings->getSetting('popup_title', 'Novidades & Atualizações');
         $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
         $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
     }
@@ -273,6 +278,19 @@ include "includes/header.php";
                         </div>
                         <p class="text-xs text-muted mt-1">
                             Quando ativado, todos os usuários verão um popup após fazer login no sistema
+                        </p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="popup_title" class="form-label">
+                            <i class="fas fa-heading mr-2"></i>
+                            Título do Popup
+                        </label>
+                        <input type="text" id="popup_title" name="popup_title" class="form-input" 
+                               value="<?php echo htmlspecialchars($popupTitle); ?>" 
+                               placeholder="Ex: Novidades & Atualizações">
+                        <p class="text-xs text-muted mt-1">
+                            Título que será exibido no topo do popup
                         </p>
                     </div>
                     
@@ -665,6 +683,7 @@ document.addEventListener('DOMContentLoaded', function() {
         previewPopupBtn.addEventListener('click', function() {
             const popupEnabled = document.getElementById('popup_enabled').checked;
             const popupMessage = document.getElementById('popup_message').value;
+            const popupTitle = document.getElementById('popup_title').value;
             const popupButtonText = document.getElementById('popup_button_text').value;
             const popupButtonUrl = document.getElementById('popup_button_url').value;
             
@@ -691,7 +710,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Mostrar pré-visualização
             Swal.fire({
-                title: 'Mensagem do Sistema',
+                title: popupTitle || 'Novidades & Atualizações',
                 html: `
                     <div>${popupMessage}</div>
                     ${buttonHtml}
@@ -699,17 +718,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 showConfirmButton: !buttonHtml,
                 showCloseButton: true,
                 confirmButtonText: 'Fechar',
+                position: 'center',
                 customClass: {
                     container: 'modern-popup',
-                    popup: 'swal2-popup',
+                    popup: 'modern-popup',
                     title: 'swal2-title',
                     htmlContainer: 'swal2-html-container',
                     confirmButton: 'swal2-confirm',
                     closeButton: 'swal2-close',
-                    backdrop: 'swal2-backdrop'
+                    backdrop: 'modern-popup-backdrop'
                 },
                 buttonsStyling: false,
-                position: 'center'
             });
         });
     }
