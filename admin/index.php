@@ -9,6 +9,7 @@ $popupButtonText = '';
 $popupButtonUrl = '';
 $showPopup = false;
 
+
 // Verificar se o usuário acabou de fazer login
 if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) {
     $showPopup = true;
