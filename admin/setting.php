@@ -6,8 +6,10 @@ if (!isset($_SESSION["usuario"])) {
 }
 
 require_once 'classes/User.php';
+require_once 'classes/AdminSettings.php';
 
 $user = new User();
+$adminSettings = new AdminSettings();
 $mensagem = "";
 $tipoMensagem = "";
 
@@ -26,12 +28,43 @@ try {
     $tipoMensagem = "error";
 }
 
+// Carregar configurações do popup (apenas para admin)
+$popupEnabled = false;
+$popupMessage = '';
+$popupButtonText = '';
+$popupButtonUrl = '';
+
+if ($_SESSION["role"] === 'admin') {
+    $popupEnabled = $adminSettings->getSetting('popup_enabled', '0') === '1';
+    $popupMessage = $adminSettings->getSetting('popup_message', '');
+    $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
+    $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
     $novo_usuario = trim($_POST["novo_usuario"]);
     $senha_atual = trim($_POST["senha_atual"]);
     $nova_senha = trim($_POST["nova_senha"]);
     $confirmar_senha = trim($_POST["confirmar_senha"]);
 
+    // Processar configurações do popup (apenas para admin)
+    if ($_SESSION["role"] === 'admin' && isset($_POST['save_popup_settings'])) {
+        $popupEnabled = isset($_POST['popup_enabled']);
+        $popupMessage = trim($_POST['popup_message']);
+        $popupButtonText = trim($_POST['popup_button_text']);
+        $popupButtonUrl = trim($_POST['popup_button_url']);
+        
+        // Salvar configurações
+        $adminSettings->setSetting('popup_enabled', $popupEnabled ? '1' : '0');
+        $adminSettings->setSetting('popup_message', $popupMessage);
+        $adminSettings->setSetting('popup_button_text', $popupButtonText);
+        $adminSettings->setSetting('popup_button_url', $popupButtonUrl);
+        
+        $mensagem = "Configurações do popup atualizadas com sucesso!";
+        $tipoMensagem = "success";
+    }
+    // Processar alterações de usuário/senha
+    else {
     // Validações básicas
     if (empty($novo_usuario)) {
         $mensagem = "O nome de usuário não pode estar vazio!";
@@ -85,6 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
             $mensagem = "Erro ao verificar senha: " . $e->getMessage();
             $tipoMensagem = "error";
         }
+    }
     }
 }
 
@@ -206,6 +240,93 @@ include "includes/header.php";
             </div>
         </div>
     </div>
+
+    <?php if ($_SESSION["role"] === 'admin'): ?>
+    <!-- Configurações do Popup (apenas para admin) -->
+    <div class="lg:col-span-2">
+        <div class="card mt-6">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bell text-primary-500 mr-2"></i>
+                    Configurações do Popup Pós-Login
+                </h3>
+                <p class="card-subtitle">Configure o popup que será exibido para todos os usuários após o login</p>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="" id="popupSettingsForm">
+                    <input type="hidden" name="save_popup_settings" value="1">
+                    
+                    <div class="form-group">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="popup_enabled" name="popup_enabled" class="form-checkbox" 
+                                   <?php echo $popupEnabled ? 'checked' : ''; ?>>
+                            <label for="popup_enabled" class="ml-2 font-medium">
+                                Ativar popup após o login
+                            </label>
+                        </div>
+                        <p class="text-xs text-muted mt-1">
+                            Quando ativado, todos os usuários verão um popup após fazer login no sistema
+                        </p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="popup_message" class="form-label">
+                            <i class="fas fa-comment-alt mr-2"></i>
+                            Mensagem do Popup
+                        </label>
+                        <textarea id="popup_message" name="popup_message" class="form-input" rows="4" 
+                                  placeholder="Digite a mensagem que será exibida no popup"><?php echo htmlspecialchars($popupMessage); ?></textarea>
+                        <p class="text-xs text-muted mt-1">
+                            Você pode usar HTML básico para formatação (negrito, itálico, links, etc.)
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="popup_button_text" class="form-label">
+                                <i class="fas fa-mouse-pointer mr-2"></i>
+                                Texto do Botão
+                            </label>
+                            <input type="text" id="popup_button_text" name="popup_button_text" class="form-input" 
+                                   value="<?php echo htmlspecialchars($popupButtonText); ?>" 
+                                   placeholder="Ex: Saiba mais">
+                            <p class="text-xs text-muted mt-1">
+                                Deixe em branco para não exibir um botão
+                            </p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="popup_button_url" class="form-label">
+                                <i class="fas fa-link mr-2"></i>
+                                URL do Botão
+                            </label>
+                            <input type="text" id="popup_button_url" name="popup_button_url" class="form-input" 
+                                   value="<?php echo htmlspecialchars($popupButtonUrl); ?>" 
+                                   placeholder="Ex: https://exemplo.com">
+                            <p class="text-xs text-muted mt-1">
+                                URL para onde o botão irá redirecionar
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mt-4">
+                        <button type="button" class="btn btn-secondary" id="previewPopupBtn">
+                            <i class="fas fa-eye"></i>
+                            Pré-visualizar Popup
+                        </button>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            Salvar Configurações do Popup
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Sidebar Info -->
     <div class="space-y-6">
@@ -526,5 +647,57 @@ function resetForm() {
     document.getElementById('passwordMatch').style.display = 'none';
 }
 </script>
+
+<?php if ($_SESSION["role"] === 'admin'): ?>
+<script>
+// Script para pré-visualização do popup
+document.addEventListener('DOMContentLoaded', function() {
+    const previewPopupBtn = document.getElementById('previewPopupBtn');
+    
+    if (previewPopupBtn) {
+        previewPopupBtn.addEventListener('click', function() {
+            const popupEnabled = document.getElementById('popup_enabled').checked;
+            const popupMessage = document.getElementById('popup_message').value;
+            const popupButtonText = document.getElementById('popup_button_text').value;
+            const popupButtonUrl = document.getElementById('popup_button_url').value;
+            
+            if (!popupEnabled || !popupMessage.trim()) {
+                Swal.fire({
+                    title: 'Aviso',
+                    text: 'O popup está desativado ou não tem mensagem. Ative-o e adicione uma mensagem para visualizar.',
+                    icon: 'warning',
+                    background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                    color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                });
+                return;
+            }
+            
+            // Configurar botão (se houver)
+            let buttonHtml = '';
+            if (popupButtonText.trim() && popupButtonUrl.trim()) {
+                buttonHtml = `
+                    <a href="${popupButtonUrl}" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 1rem;">
+                        ${popupButtonText}
+                    </a>
+                `;
+            }
+            
+            // Mostrar pré-visualização
+            Swal.fire({
+                title: 'Mensagem do Sistema',
+                html: `
+                    <div>${popupMessage}</div>
+                    ${buttonHtml}
+                `,
+                showConfirmButton: !buttonHtml,
+                confirmButtonText: 'Fechar',
+                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+            });
+        });
+    }
+});
+</script>
+<?php endif; ?>
 
 <?php include "includes/footer.php"; ?>
