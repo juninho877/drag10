@@ -1164,6 +1164,7 @@ document.addEventListener('DOMContentLoaded', function() {
         `,
         showConfirmButton: <?php echo empty($popupButtonText) ? 'true' : 'false'; ?>,
         confirmButtonText: 'Fechar',
+        showCloseButton: true,
         customClass: {
             container: 'modern-popup',
             popup: 'modern-popup-content',
@@ -1173,6 +1174,7 @@ document.addEventListener('DOMContentLoaded', function() {
             backdrop: 'modern-popup-backdrop'
         },
         buttonsStyling: false,
+        position: 'center',
         showClass: {
             popup: 'animate__animated animate__fadeInDown'
         },

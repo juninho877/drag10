@@ -697,6 +697,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${buttonHtml}
                 `,
                 showConfirmButton: !buttonHtml,
+                showCloseButton: true,
                 confirmButtonText: 'Fechar',
                 customClass: {
                     container: 'modern-popup',
@@ -706,7 +707,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     confirmButton: 'modern-popup-confirm',
                     backdrop: 'modern-popup-backdrop'
                 },
-                buttonsStyling: false
+                buttonsStyling: false,
+                position: 'center'
             });
         });
     }
