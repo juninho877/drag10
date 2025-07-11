@@ -198,7 +198,7 @@ include "includes/header.php";
                         <textarea id="movie_series_message" name="movie_series_message" class="form-input" rows="4" 
                                   placeholder="Mensagem personalizada para banners de filmes e séries"><?php echo htmlspecialchars($currentSettings['movie_series_message'] ?? ''); ?></textarea>
                         <p class="text-xs text-muted mt-1">
-                            Variáveis disponíveis: $data (data atual), $hora (hora atual), $nomedofilme (nome do filme/série)
+                            Variáveis disponíveis: $data (data atual), $hora (hora atual), $nomedofilme (nome do filme/série), $lancamento (ano de lançamento), $categoria (gêneros do conteúdo)
                         </p>
                         <p class="text-xs text-muted">
                             Deixe em branco para usar a mensagem padrão
