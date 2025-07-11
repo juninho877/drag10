@@ -198,7 +198,7 @@ include "includes/header.php";
                         <textarea id="movie_series_message" name="movie_series_message" class="form-input" rows="4" 
                                   placeholder="Mensagem personalizada para banners de filmes e séries"><?php echo htmlspecialchars($currentSettings['movie_series_message'] ?? ''); ?></textarea>
                         <p class="text-xs text-muted mt-1">
-                            Variáveis disponíveis: $data (data atual), $hora (hora atual), $nomedofilme (nome do filme/série), $lancamento (ano de lançamento), $categoria (gêneros do conteúdo)
+                            Variáveis disponíveis: <strong>$data</strong> (data atual), <strong>$hora</strong> (hora atual), <strong>$nomedofilme</strong> (nome do filme/série), <strong>$lancamento</strong> (ano de lançamento), <strong>$categoria</strong> (gêneros do conteúdo)
                         </p>
                         <p class="text-xs text-muted">
                             Deixe em branco para usar a mensagem padrão
@@ -491,20 +491,28 @@ include "includes/header.php";
             <div class="card-body">
                 <div class="space-y-3 text-sm">
                     <div class="variable-item">
-                        <code>$data</code>
+                        <code><strong>$data</strong></code>
                         <p>Data atual (ex: 25/06/2025)</p>
                     </div>
                     <div class="variable-item">
-                        <code>$hora</code>
+                        <code><strong>$hora</strong></code>
                         <p>Hora atual (ex: 14:30)</p>
                     </div>
                     <div class="variable-item">
-                        <code>$jogos</code>
+                        <code><strong>$jogos</strong></code>
                         <p>Quantidade de jogos (apenas para banners de futebol)</p>
                     </div>
                     <div class="variable-item">
-                        <code>$nomedofilme</code>
+                        <code><strong>$nomedofilme</strong></code>
                         <p>Nome do filme ou série (apenas para banners de filmes/séries)</p>
+                    </div>
+                    <div class="variable-item">
+                        <code><strong>$lancamento</strong></code>
+                        <p>Ano de lançamento do filme ou série</p>
+                    </div>
+                    <div class="variable-item">
+                        <code><strong>$categoria</strong></code>
+                        <p>Gêneros do conteúdo (ex: Ação, Aventura, Drama)</p>
                     </div>
                 </div>
             </div>
