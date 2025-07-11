@@ -373,6 +373,7 @@ class TelegramService {
      */
     public function sendMovieSeriesBanner($userId, $bannerPath, $contentName, $contentType = 'filme') {
         try {
+            error_log("TelegramService::sendMovieSeriesBanner - Iniciando envio para: " . $contentName);
             if (!file_exists($bannerPath)) {
                 return ['success' => false, 'message' => 'Arquivo do banner não encontrado: ' . $bannerPath];
             }
@@ -386,6 +387,7 @@ class TelegramService {
             // Buscar informações adicionais do filme/série (ano de lançamento e categoria)
             $lancamento = '';
             $categoria = '';
+            error_log("TelegramService::sendMovieSeriesBanner - Buscando informações adicionais para: " . $contentName);
             
             // Tentar obter informações da API TMDB
             $apiKey = 'ec8237f367023fbadd38ab6a1596b40c';
@@ -393,6 +395,7 @@ class TelegramService {
             $searchType = $contentType == 'serie' ? 'tv' : 'movie';
             $searchUrl = "https://api.themoviedb.org/3/search/{$searchType}?api_key={$apiKey}&language={$language}&query=" . urlencode($contentName);
             
+            error_log("TelegramService::sendMovieSeriesBanner - URL de busca: " . $searchUrl);
             $context = stream_context_create([
                 'http' => [
                     'timeout' => 5,
@@ -401,29 +404,37 @@ class TelegramService {
             ]);
             
             $searchResponse = @file_get_contents($searchUrl, false, $context);
+            error_log("TelegramService::sendMovieSeriesBanner - Resposta da API recebida: " . ($searchResponse ? 'Sim' : 'Não'));
             if ($searchResponse !== false) {
                 $searchData = json_decode($searchResponse, true);
+                error_log("TelegramService::sendMovieSeriesBanner - Dados decodificados: " . json_encode($searchData));
                 if (json_last_error() === JSON_ERROR_NONE && !empty($searchData['results'])) {
                     $firstResult = $searchData['results'][0];
+                    error_log("TelegramService::sendMovieSeriesBanner - Primeiro resultado: " . json_encode($firstResult));
                     
                     // Obter ano de lançamento
                     if ($searchType === 'movie' && !empty($firstResult['release_date'])) {
                         $lancamento = substr($firstResult['release_date'], 0, 4);
+                        error_log("TelegramService::sendMovieSeriesBanner - Ano de lançamento (filme): " . $lancamento);
                     } elseif ($searchType === 'tv' && !empty($firstResult['first_air_date'])) {
                         $lancamento = substr($firstResult['first_air_date'], 0, 4);
+                        error_log("TelegramService::sendMovieSeriesBanner - Ano de lançamento (série): " . $lancamento);
                     }
                     
                     // Obter ID para buscar detalhes completos
                     if (!empty($firstResult['id'])) {
                         $detailsUrl = "https://api.themoviedb.org/3/{$searchType}/{$firstResult['id']}?api_key={$apiKey}&language={$language}";
+                        error_log("TelegramService::sendMovieSeriesBanner - URL de detalhes: " . $detailsUrl);
                         $detailsResponse = @file_get_contents($detailsUrl, false, $context);
                         
                         if ($detailsResponse !== false) {
                             $detailsData = json_decode($detailsResponse, true);
+                            error_log("TelegramService::sendMovieSeriesBanner - Detalhes decodificados: " . json_encode($detailsData));
                             if (json_last_error() === JSON_ERROR_NONE && !empty($detailsData['genres'])) {
                                 // Extrair categorias/gêneros
                                 $genres = array_column($detailsData['genres'], 'name');
                                 $categoria = implode(', ', $genres);
+                                error_log("TelegramService::sendMovieSeriesBanner - Categorias/gêneros: " . $categoria);
                             }
                         }
                     }
@@ -436,6 +447,7 @@ class TelegramService {
             if (!empty($settings['movie_series_message'])) {
                 // Substituir variáveis na mensagem personalizada
                 $customMessage = $settings['movie_series_message'];
+                error_log("TelegramService::sendMovieSeriesBanner - Mensagem personalizada original: " . $customMessage);
                 $data = date('d/m/Y');
                 $hora = date('H:i');
                 
@@ -444,6 +456,7 @@ class TelegramService {
                 $customMessage = str_replace('$nomedofilme', $contentName, $customMessage);
                 $customMessage = str_replace('$lancamento', $lancamento, $customMessage);
                 $customMessage = str_replace('$categoria', $categoria, $customMessage);
+                error_log("TelegramService::sendMovieSeriesBanner - Mensagem personalizada após substituição: " . $customMessage);
                 
                 $caption = $customMessage;
             } else {
@@ -451,19 +464,24 @@ class TelegramService {
                 $caption .= "📅 Gerado em: " . date('d/m/Y H:i') . "\n";
                 if (!empty($lancamento)) {
                     $caption .= "🗓️ Lançamento: " . $lancamento . "\n";
+                    error_log("TelegramService::sendMovieSeriesBanner - Adicionando lançamento à mensagem padrão: " . $lancamento);
                 }
                 if (!empty($categoria)) {
                     $caption .= "🎭 Gênero: " . $categoria . "\n";
+                    error_log("TelegramService::sendMovieSeriesBanner - Adicionando categoria à mensagem padrão: " . $categoria);
                 }
                 $caption .= "🎨 GeraTop";
             }
+            error_log("TelegramService::sendMovieSeriesBanner - Legenda final: " . $caption);
             
             // Enviar para o Telegram
             $result = $this->sendSinglePhoto($settings['bot_token'], $settings['chat_id'], $bannerPath, $caption);
             
+            error_log("TelegramService::sendMovieSeriesBanner - Resultado do envio: " . json_encode($result));
             return $result;
             
         } catch (Exception $e) {
+            error_log("TelegramService::sendMovieSeriesBanner - ERRO: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             error_log("Erro em sendMovieSeriesBanner: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return ['success' => false, 'message' => 'Erro ao enviar banner: ' . $e->getMessage()];
         }
