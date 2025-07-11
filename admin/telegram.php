@@ -220,24 +220,6 @@ include "includes/header.php";
                         </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="form-group">
-                                <label for="scheduled_time" class="form-label">
-                                    <i class="fas fa-hourglass-half mr-2"></i>
-                        <?php if ($_SESSION["role"] === 'admin'): ?>
-                        <div class="form-group">
-                            <label for="notification_chat_id" class="form-label">
-                                <i class="fas fa-bell mr-2"></i>
-                                Chat ID para Notificações de Cadastro
-                            </label>
-                            <input type="text" id="notification_chat_id" name="notification_chat_id" class="form-input" 
-                                   value="<?php echo htmlspecialchars($currentSettings['notification_chat_id'] ?? ''); ?>" 
-                                   placeholder="-1001234567890 ou 123456789">
-                            <p class="text-xs text-muted mt-1">
-                                ID do chat onde serão enviadas notificações de novos cadastros (apenas para administradores)
-                            </p>
-                        </div>
-                        <?php endif; ?>
-                        
                                     Horário de Envio
                                 </label>
                                 <input type="time" id="scheduled_time" name="scheduled_time" class="form-input" 

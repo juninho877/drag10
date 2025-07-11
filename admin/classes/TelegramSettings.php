@@ -49,28 +49,27 @@ class TelegramSettings {
             }
             
             // Validar notification_chat_id (apenas para admin)
-            if (!empty($notificationChatId) && $_SESSION["role"] !== 'admin') {
-                $notificationChatId = null; // Ignorar se não for admin
+            if (!empty($notificationChatId)) {
+                if ($_SESSION["role"] !== 'admin') {
+                    $notificationChatId = null; // Ignorar se não for admin
+                } else {
+                    // Validar formato do notification_chat_id (mesmo formato do chat_id normal)
+                    if (!preg_match('/^-?\d+$/', $notificationChatId)) {
+                        return ['success' => false, 'message' => 'Chat ID de notificações deve ser um número (positivo para chat privado, negativo para grupos)'];
+                    }
+                }
             }
             
             // Criar tabela se não existir
             $this->createTelegramSettingsTable();
             
             $stmt = $this->db->prepare("
-                INSERT INTO user_telegram_settings (
-                    user_id, 
-                    bot_token, 
-                    chat_id, 
-                    football_message, 
-                    movie_series_message,
-                    scheduled_time,
-                    scheduled_football_theme,
-                    scheduled_delivery_enabled,
-                    notification_chat_id
-                ) 
+                INSERT INTO user_telegram_settings 
+                (user_id, bot_token, chat_id, football_message, movie_series_message, 
+                 scheduled_time, scheduled_football_theme, scheduled_delivery_enabled, notification_chat_id) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE 
-                bot_token = VALUES(bot_token), 
+                ON DUPLICATE KEY UPDATE
+                bot_token = VALUES(bot_token),
                 chat_id = VALUES(chat_id),
                 football_message = VALUES(football_message),
                 movie_series_message = VALUES(movie_series_message),
@@ -149,7 +148,7 @@ class TelegramSettings {
                 scheduled_time VARCHAR(5),
                 scheduled_football_theme INT DEFAULT 1,
                 scheduled_delivery_enabled TINYINT(1) DEFAULT 0,
-               notification_chat_id VARCHAR(50),
+                notification_chat_id VARCHAR(50),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 UNIQUE KEY unique_user_telegram (user_id),
@@ -160,6 +159,24 @@ class TelegramSettings {
             ";
             
             $this->db->exec($sql);
+            
+            // Verifica se a coluna notification_chat_id existe, se não, adiciona
+            $stmt = $this->db->prepare("
+                SELECT COUNT(*) as column_exists 
+                FROM information_schema.COLUMNS 
+                WHERE TABLE_SCHEMA = DATABASE() 
+                AND TABLE_NAME = 'user_telegram_settings' 
+                AND COLUMN_NAME = 'notification_chat_id'
+            ");
+            $stmt->execute();
+            $result = $stmt->fetch();
+            
+            if ($result['column_exists'] == 0) {
+                $this->db->exec("
+                    ALTER TABLE user_telegram_settings 
+                    ADD COLUMN notification_chat_id VARCHAR(50) NULL
+                ");
+            }
         } catch (PDOException $e) {
             error_log("Erro ao criar tabela de configurações do Telegram: " . $e->getMessage());
         }
