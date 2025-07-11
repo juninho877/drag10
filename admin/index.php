@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'classes/AdminSettings.php';
 if (!isset($_SESSION["usuario"])) {
     header("Location: login.php");
     exit();
@@ -8,6 +9,13 @@ if (!isset($_SESSION["usuario"])) {
 // Incluir funções necessárias para obter dados reais
 require_once 'includes/banner_functions.php';
 require_once 'classes/BannerStats.php';
+
+// Verificar se deve exibir o popup
+$adminSettings = new AdminSettings();
+$showPopup = $adminSettings->getSetting('popup_enabled', '0') === '1';
+$popupMessage = $adminSettings->getSetting('popup_message', '');
+$popupButtonText = $adminSettings->getSetting('popup_button_text', '');
+$popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
 
 // Obter dados reais dos jogos
 $jogos = obterJogosDeHoje();
@@ -1132,6 +1140,37 @@ include "includes/header.php"; // Mantém seu header.php original
         </div>
     </div>
 </div>
+
+<?php if ($showPopup && !empty($popupMessage)): ?>
+<!-- Popup Modal -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configurar botão (se houver)
+    let buttonHtml = '';
+    <?php if (!empty($popupButtonText) && !empty($popupButtonUrl)): ?>
+    buttonHtml = `
+        <a href="<?php echo htmlspecialchars($popupButtonUrl); ?>" class="swal2-confirm swal2-styled" style="display: inline-block; margin-top: 1rem;">
+            <?php echo htmlspecialchars($popupButtonText); ?>
+        </a>
+    `;
+    <?php endif; ?>
+    
+    // Mostrar popup
+    Swal.fire({
+        title: 'Mensagem do Sistema',
+        html: `
+            <div><?php echo $popupMessage; ?></div>
+            ${buttonHtml}
+        `,
+        showConfirmButton: <?php echo empty($popupButtonText) ? 'true' : 'false'; ?>,
+        confirmButtonText: 'Fechar',
+        background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+        color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+    });
+});
+</script>
+<?php endif; ?>
 
 <script>
     // Theme Management
