@@ -1,6 +1,17 @@
 <?php
 session_start();
 require_once 'classes/AdminSettings.php';
+
+// Definir flag para exibição do popup apenas após login
+$showPopup = false;
+
+// Verificar se o usuário acabou de fazer login
+if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) {
+    $showPopup = true;
+    // Remover a flag para que o popup não seja exibido novamente nesta sessão
+    $_SESSION['just_logged_in'] = false;
+}
+
 if (!isset($_SESSION["usuario"])) {
     header("Location: login.php");
     exit();
@@ -13,9 +24,17 @@ require_once 'classes/BannerStats.php';
 // Verificar se deve exibir o popup
 $adminSettings = new AdminSettings();
 $showPopup = $adminSettings->getSetting('popup_enabled', '0') == '1';
-$popupMessage = $adminSettings->getSetting('popup_message', '');
-$popupButtonText = $adminSettings->getSetting('popup_button_text', '');
-$popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
+
+// Carregar configurações do popup apenas se ele estiver habilitado e for exibido
+$popupMessage = '';
+$popupButtonText = '';
+$popupButtonUrl = '';
+
+if ($popupEnabled && $showPopup) {
+    $popupMessage = $adminSettings->getSetting('popup_message', '');
+    $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
+    $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
+}
 
 // Obter dados reais dos jogos
 $jogos = obterJogosDeHoje();
@@ -719,8 +738,8 @@ include "includes/header.php"; // Mantém seu header.php original
 <link rel="stylesheet" href="css/popup-styles.css">
 
 <?php if ($isAdmin): ?>
-    <div class="admin-stats-section mb-6">
-        <h2 class="section-title">
+// Exibir popup se estiver habilitado, tiver mensagem e o usuário acabou de fazer login
+<?php if ($popupEnabled && !empty($popupMessage) && $showPopup): ?>
             <i class="fas fa-globe text-primary-500 mr-2"></i>
             Estatísticas Globais do Sistema
         </h2>
@@ -1160,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', function() {
         title: 'Novidades & Atualizações',
         html: `
             <div><?php echo $popupMessage; ?></div>
-            ${buttonHtml}
+            <div style="margin-top: 20px;">${buttonHtml}</div>
         `,
         showConfirmButton: <?php echo empty($popupButtonText) ? 'true' : 'false'; ?>,
         confirmButtonText: 'Fechar',
