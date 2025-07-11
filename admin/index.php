@@ -1,6 +1,7 @@
 /* Estilos modernos para o popup do sistema */
 .modern-popup {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    text-align: center;
 }
 
 /* Container principal do popup */
@@ -40,7 +41,7 @@
 
 /* Conteúdo do popup */
 .modern-popup .swal2-html-container {
-    margin: 0;
+    margin: 0 !important;
     text-align: center !important;
     padding: 2rem;
     font-size: 1rem;
@@ -96,7 +97,7 @@
 
 /* Área de botões */
 .modern-popup .swal2-actions {
-    margin: 0;
+    margin: 0 !important;
     display: flex !important;
     justify-content: center !important;
     padding: 0 2rem 2rem;
