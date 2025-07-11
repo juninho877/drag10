@@ -42,14 +42,9 @@ try {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
-    $novo_usuario = trim($_POST["novo_usuario"]);
-    $senha_atual = trim($_POST["senha_atual"]);
-    $nova_senha = trim($_POST["nova_senha"]);
-    $confirmar_senha = trim($_POST["confirmar_senha"]);
-
     // Processar configurações do popup (apenas para admin)
-    if ($_SESSION["role"] === 'admin' && isset($_POST['popup_enabled'])) {
-        $popupEnabled = isset($_POST['popup_enabled']);
+    if ($_SESSION["role"] === 'admin' && isset($_POST['save_popup_settings'])) {
+        $popupEnabled = isset($_POST['popup_enabled']) ? true : false;
         $popupMessage = trim($_POST['popup_message']);
         $popupButtonText = trim($_POST['popup_button_text']);
         $popupButtonUrl = trim($_POST['popup_button_url']);
@@ -70,7 +65,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
         $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
     }
     // Processar alterações de usuário/senha
-    elseif (isset($_POST['novo_usuario']) && isset($_POST['senha_atual'])) {
+    elseif (isset($_POST['update_user_settings'])) {
+    $novo_usuario = trim($_POST["novo_usuario"]);
+    $senha_atual = trim($_POST["senha_atual"]);
+    $nova_senha = trim($_POST["nova_senha"]);
+    $confirmar_senha = trim($_POST["confirmar_senha"]);
+    
     // Validações básicas
     if (empty($novo_usuario)) {
         $mensagem = "O nome de usuário não pode estar vazio!";
@@ -158,6 +158,7 @@ include "includes/header.php";
 
                 <?php if ($currentUserData): ?>
                 <form method="POST" action="" id="settingsForm">
+                    <input type="hidden" name="update_user_settings" value="1">
                     <div class="form-group">
                         <label for="novo_usuario" class="form-label">
                             <i class="fas fa-user mr-2"></i>

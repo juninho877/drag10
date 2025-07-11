@@ -22,8 +22,7 @@ class AdminSettings {
             id INT AUTO_INCREMENT PRIMARY KEY,
             setting_name VARCHAR(255) NOT NULL UNIQUE,
             setting_value TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
         ";
         
@@ -68,11 +67,10 @@ class AdminSettings {
     public function setSetting($name, $value) {
         try {
             $stmt = $this->db->prepare("
-                INSERT INTO admin_settings (setting_name, setting_value) 
+                INSERT INTO admin_settings (setting_name, setting_value, created_at) 
                 VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE 
-                setting_value = VALUES(setting_value),
-                updated_at = CURRENT_TIMESTAMP
+                setting_value = VALUES(setting_value)
             ");
             $stmt->execute([$name, $value]);
             

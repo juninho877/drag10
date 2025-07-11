@@ -12,7 +12,7 @@ require_once 'classes/BannerStats.php';
 
 // Verificar se deve exibir o popup
 $adminSettings = new AdminSettings();
-$showPopup = $adminSettings->getSetting('popup_enabled', '0') === '1';
+$showPopup = $adminSettings->getSetting('popup_enabled', '0') == '1';
 $popupMessage = $adminSettings->getSetting('popup_message', '');
 $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
 $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
