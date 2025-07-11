@@ -17,17 +17,6 @@ $tipoMensagem = "";
 $userId = $_SESSION['user_id'];
 $currentUserData = null;
 
-try {
-    $currentUserData = $user->getUserById($userId);
-    if (!$currentUserData) {
-        $mensagem = "Erro ao carregar dados do usuário!";
-        $tipoMensagem = "error";
-    }
-} catch (Exception $e) {
-    $mensagem = "Erro de conexão com o banco de dados: " . $e->getMessage();
-    $tipoMensagem = "error";
-}
-
 // Carregar configurações do popup (apenas para admin)
 $popupEnabled = false;
 $popupMessage = '';
@@ -41,6 +30,17 @@ if ($_SESSION["role"] === 'admin') {
     $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
 }
 
+try {
+    $currentUserData = $user->getUserById($userId);
+    if (!$currentUserData) {
+        $mensagem = "Erro ao carregar dados do usuário!";
+        $tipoMensagem = "error";
+    }
+} catch (Exception $e) {
+    $mensagem = "Erro de conexão com o banco de dados: " . $e->getMessage();
+    $tipoMensagem = "error";
+}
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
     $novo_usuario = trim($_POST["novo_usuario"]);
     $senha_atual = trim($_POST["senha_atual"]);
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
     $confirmar_senha = trim($_POST["confirmar_senha"]);
 
     // Processar configurações do popup (apenas para admin)
-    if ($_SESSION["role"] === 'admin' && isset($_POST['save_popup_settings'])) {
+    if ($_SESSION["role"] === 'admin' && isset($_POST['popup_enabled'])) {
         $popupEnabled = isset($_POST['popup_enabled']);
         $popupMessage = trim($_POST['popup_message']);
         $popupButtonText = trim($_POST['popup_button_text']);
@@ -62,9 +62,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $currentUserData) {
         
         $mensagem = "Configurações do popup atualizadas com sucesso!";
         $tipoMensagem = "success";
+        
+        // Atualizar variáveis locais para refletir as novas configurações
+        $popupEnabled = $adminSettings->getSetting('popup_enabled', '0') === '1';
+        $popupMessage = $adminSettings->getSetting('popup_message', '');
+        $popupButtonText = $adminSettings->getSetting('popup_button_text', '');
+        $popupButtonUrl = $adminSettings->getSetting('popup_button_url', '');
     }
     // Processar alterações de usuário/senha
-    else {
+    elseif (isset($_POST['novo_usuario']) && isset($_POST['senha_atual'])) {
     // Validações básicas
     if (empty($novo_usuario)) {
         $mensagem = "O nome de usuário não pode estar vazio!";
