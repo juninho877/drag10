@@ -40,6 +40,8 @@ $bannerPath = urldecode($_GET['banner_path']);
 $bannerName = urldecode($_GET['banner_name']);
 $contentName = isset($_GET['content_name']) ? urldecode($_GET['content_name']) : pathinfo($bannerName, PATHINFO_FILENAME);
 $contentType = isset($_GET['type']) ? urldecode($_GET['type']) : 'filme';
+$lancamento = isset($_GET['year']) ? urldecode($_GET['year']) : '';
+$categoria = isset($_GET['category']) ? urldecode($_GET['category']) : '';
 $userId = $_SESSION['user_id'];
 
 // Inicializar serviço do Telegram
