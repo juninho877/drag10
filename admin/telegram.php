@@ -150,6 +150,25 @@ include "includes/header.php";
                         </button>
                     </div>
                     
+                    <?php if ($_SESSION["role"] === 'admin'): ?>
+                    <div class="form-group">
+                        <label for="notification_chat_id" class="form-label">
+                            <i class="fas fa-bell mr-2"></i>
+                            Chat ID para Notificações de Cadastro
+                        </label>
+                        <input type="text" id="notification_chat_id" name="notification_chat_id" class="form-input" 
+                               value="<?php echo htmlspecialchars($currentSettings['notification_chat_id'] ?? ''); ?>" 
+                               placeholder="-1001234567890 ou 123456789">
+                        <p class="text-xs text-muted mt-1">
+                            ID do chat onde serão enviadas notificações de novos cadastros (apenas para administradores)
+                        </p>
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" id="testNotificationChatBtn">
+                            <i class="fas fa-search"></i>
+                            Verificar Chat
+                        </button>
+                    </div>
+                    <?php endif; ?>
+                    
                     <div class="form-group">
                         <label for="football_message" class="form-label">
                             <i class="fas fa-futbol mr-2"></i>
@@ -868,9 +887,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const testBotBtn = document.getElementById('testBotBtn');
     const testChatBtn = document.getElementById('testChatBtn');
     const sendTestBtn = document.getElementById('sendTestBtn');
+    const testNotificationChatBtn = document.getElementById('testNotificationChatBtn');
     const deleteBtn = document.getElementById('deleteBtn');
     const botTokenInput = document.getElementById('bot_token');
     const chatIdInput = document.getElementById('chat_id');
+    const notificationChatIdInput = document.getElementById('notification_chat_id');
     const scheduledEnabledCheckbox = document.getElementById('scheduled_delivery_enabled');
 
     // Testar Bot
@@ -947,6 +968,46 @@ document.addEventListener('DOMContentLoaded', function() {
             this.innerHTML = '<i class="fas fa-search"></i> Verificar Chat';
         });
     });
+    
+    // Testar Chat de Notificação (apenas para admin)
+    if (testNotificationChatBtn) {
+        testNotificationChatBtn.addEventListener('click', function() {
+            const botToken = botTokenInput.value.trim();
+            const notificationChatId = notificationChatIdInput.value.trim();
+            
+            if (!botToken || !notificationChatId) {
+                showAlert('error', 'Digite o token do bot e Chat ID de notificação primeiro');
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verificando...';
+
+            fetch('telegram.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=test_chat&bot_token=${encodeURIComponent(botToken)}&chat_id=${encodeURIComponent(notificationChatId)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const chatInfo = data.chat_info;
+                    showAlert('success', `Chat de notificação encontrado: ${chatInfo.title} (${chatInfo.type})`);
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                showAlert('error', 'Erro na verificação: ' + error.message);
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-search"></i> Verificar Chat';
+            });
+        });
+    }
 
     // Enviar Teste
     sendTestBtn.addEventListener('click', function() {
