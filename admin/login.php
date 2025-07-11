@@ -32,7 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION["usuario"] = $result['user']['username'];
             $_SESSION["user_id"] = $result['user']['id'];
             $_SESSION["role"] = $result['user']['role'];
-            $_SESSION["just_logged_in"] = true; // Marcar que o usuário acabou de fazer login
             header("Location: index.php");
             exit();
         } else {
