@@ -738,8 +738,8 @@ include "includes/header.php"; // Mantém seu header.php original
 <link rel="stylesheet" href="css/popup-styles.css">
 
 <?php if ($isAdmin): ?>
-// Exibir popup se estiver habilitado, tiver mensagem e o usuário acabou de fazer login
-<?php if ($popupEnabled && !empty($popupMessage) && $showPopup): ?>
+    <div class="admin-stats-section mb-6">
+        <h2 class="section-title">
             <i class="fas fa-globe text-primary-500 mr-2"></i>
             Estatísticas Globais do Sistema
         </h2>
