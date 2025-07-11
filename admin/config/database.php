@@ -9,7 +9,7 @@ class Database {
     private $dbname = 'dragon';
     private $username = 'dragon';
     private $password = '#D_p2ahElBb7zn6u';
-    private $charset = 'utf8mb4';
+    private $charset = 'utf8mb4'; // Já está configurado para utf8mb4, o que é bom
     
     private function __construct() {
         try {
@@ -17,7 +17,8 @@ class Database {
             $options = [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_EMULATE_PREPARES => false, 
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$this->charset} COLLATE utf8mb4_unicode_ci"
             ];
             
             $this->connection = new PDO($dsn, $this->username, $this->password, $options);

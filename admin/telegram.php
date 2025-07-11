@@ -1,5 +1,7 @@
 <?php
 session_start();
+// Definir codificação UTF-8 para a saída
+header('Content-Type: text/html; charset=utf8mb4');
 if (!isset($_SESSION["usuario"])) {
     header("Location: login.php");
     exit();

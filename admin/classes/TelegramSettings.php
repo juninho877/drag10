@@ -6,6 +6,8 @@ class TelegramSettings {
     
     public function __construct() {
         $this->db = Database::getInstance()->getConnection();
+        // Garantir que a conexão use utf8mb4 para suportar emojis
+        $this->db->exec("SET NAMES utf8mb4");
     }
     
     /**
@@ -141,14 +143,14 @@ class TelegramSettings {
             CREATE TABLE IF NOT EXISTS user_telegram_settings (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 user_id INT NOT NULL,
-                bot_token VARCHAR(255) NOT NULL,
-                chat_id VARCHAR(50) NOT NULL,
-                football_message TEXT,
-                movie_series_message TEXT,
+                bot_token VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                chat_id VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+                football_message TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+                movie_series_message TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
                 scheduled_time VARCHAR(5),
                 scheduled_football_theme INT DEFAULT 1,
                 scheduled_delivery_enabled TINYINT(1) DEFAULT 0,
-                notification_chat_id VARCHAR(50),
+                notification_chat_id VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 UNIQUE KEY unique_user_telegram (user_id),
