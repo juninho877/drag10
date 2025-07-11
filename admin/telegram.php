@@ -166,6 +166,10 @@ include "includes/header.php";
                             <i class="fas fa-search"></i>
                             Verificar Chat
                         </button>
+                        <button type="button" class="btn btn-primary btn-sm mt-2 ml-2" id="sendTestNotificationBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            Enviar Teste Notificação
+                        </button>
                     </div>
                     <?php endif; ?>
                     
@@ -990,6 +994,45 @@ document.addEventListener('DOMContentLoaded', function() {
             .finally(() => {
                 this.disabled = false;
                 this.innerHTML = '<i class="fas fa-search"></i> Verificar Chat';
+            });
+        });
+    }
+    
+    // Enviar Teste de Notificação (apenas para admin)
+    if (document.getElementById('sendTestNotificationBtn')) {
+        document.getElementById('sendTestNotificationBtn').addEventListener('click', function() {
+            const botToken = botTokenInput.value.trim();
+            const notificationChatId = notificationChatIdInput.value.trim();
+            
+            if (!botToken || !notificationChatId) {
+                showAlert('error', 'Digite o token do bot e Chat ID de notificação primeiro');
+                return;
+            }
+
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            fetch('send_test_notification.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `bot_token=${encodeURIComponent(botToken)}&chat_id=${encodeURIComponent(notificationChatId)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', 'Notificação de teste enviada com sucesso!');
+                } else {
+                    showAlert('error', data.message);
+                }
+            })
+            .catch(error => {
+                showAlert('error', 'Erro no envio: ' + error.message);
+            })
+            .finally(() => {
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Teste Notificação';
             });
         });
     }

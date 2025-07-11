@@ -70,4 +70,57 @@ class TelegramNotifier {
             return false;
         }
     }
+    
+    /**
+     * Envia uma notificação de teste para o chat especificado
+     * 
+     * @param string $botToken Token do bot do Telegram
+     * @param string $chatId ID do chat para enviar a notificação
+     * @return bool Sucesso ou falha no envio
+     */
+    public static function sendTestNotification($botToken, $chatId) {
+        try {
+            // Construir a mensagem
+            $message = "🔔 *TESTE DE NOTIFICAÇÃO DE CADASTRO*\n\n";
+            $message .= "👤 *Usuário:* Usuário Teste\n";
+            $message .= "📧 *Email:* usuario.teste@exemplo.com\n";
+            $message .= "🕒 *Data:* " . date('d/m/Y H:i:s') . "\n\n";
+            $message .= "Esta é apenas uma mensagem de teste para verificar a configuração de notificações.";
+            
+            // Enviar a mensagem via API do Telegram
+            $url = "https://api.telegram.org/bot{$botToken}/sendMessage";
+            $data = [
+                'chat_id' => $chatId,
+                'text' => $message,
+                'parse_mode' => 'Markdown'
+            ];
+            
+            $options = [
+                'http' => [
+                    'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+                    'method' => 'POST',
+                    'content' => http_build_query($data)
+                ]
+            ];
+            
+            $context = stream_context_create($options);
+            $result = file_get_contents($url, false, $context);
+            
+            if ($result === false) {
+                error_log("Erro ao enviar notificação de teste: Falha na requisição HTTP");
+                return false;
+            }
+            
+            $response = json_decode($result, true);
+            if (!isset($response['ok']) || $response['ok'] !== true) {
+                error_log("Erro ao enviar notificação de teste: " . ($response['description'] ?? 'Erro desconhecido'));
+                return false;
+            }
+            
+            return true;
+        } catch (Exception $e) {
+            error_log("Exceção ao enviar notificação de teste: " . $e->getMessage());
+            return false;
+        }
+    }
 }

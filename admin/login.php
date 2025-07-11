@@ -92,8 +92,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
                 
                 // Enviar notificação via Telegram para o administrador
                 TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
-                // Enviar notificação via Telegram para o administrador
-                TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
             } else {
                 $_SESSION['register_error'] = $result['message'];
             }
