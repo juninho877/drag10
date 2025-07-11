@@ -392,7 +392,7 @@ include "includes/header.php";
                 </div>
                 
                 <?php if ($hasSettings): ?>
-                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        Variáveis disponíveis: <strong>$data</strong> (data atual), <strong>$hora</strong> (hora atual), <strong>$jogos</strong> (quantidade de jogos)
                     <p class="text-sm font-medium mb-2">Última atualização:</p>
                     <p class="text-xs text-muted">
                         <?php echo date('d/m/Y H:i', strtotime($currentSettings['updated_at'])); ?>
