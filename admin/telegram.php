@@ -183,7 +183,7 @@ include "includes/header.php";
                         <textarea id="football_message" name="football_message" class="form-input" rows="4" 
                                   placeholder="Mensagem personalizada para banners de futebol"><?php echo htmlspecialchars($currentSettings['football_message'] ?? ''); ?></textarea>
                         <p class="text-xs text-muted mt-1">
-                            Variáveis disponíveis: $data (data atual), $hora (hora atual), $jogos (quantidade de jogos)
+                            Variáveis disponíveis: </strong>$data</strong> (data atual), </strong>$hora</strong> (hora atual), </strong>$jogos</strong> (quantidade de jogos)
                         </p>
                         <p class="text-xs text-muted">
                             Deixe em branco para usar a mensagem padrão
