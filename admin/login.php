@@ -184,6 +184,12 @@ if (isset($_SESSION['register_error'])) {
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Ocultar ambos os formulários por padrão */
+        #loginFormContainer,
+        #registerFormContainer {
+            display: none;
+        }
+
         /* Dark Theme */
         [data-theme="dark"] {
             --bg-primary: #0f172a;
@@ -821,23 +827,11 @@ if (isset($_SESSION['register_error'])) {
         // Verificar se há um parâmetro 'ref' na URL para mostrar o formulário de registro diretamente
         function getUrlParameter(name) {
             name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
+            let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            let results = regex.exec(location.search);
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
         
-        // Se houver um parâmetro 'ref' na URL, mostrar o formulário de registro diretamente
-        const refFromUrl = getUrlParameter('ref');
-        console.log('refFromUrl:', refFromUrl); // Para depuração
-        
-        if (refFromUrl) {
-            loginFormContainer.style.display = 'none';
-            registerFormContainer.style.display = 'block';
-        } else {
-            loginFormContainer.style.display = 'block';
-            registerFormContainer.style.display = 'none';
-        }
-
         const showRegisterFormBtn = document.getElementById('showRegisterForm');
         const showLoginFormBtn = document.getElementById('showLoginForm');
         
@@ -910,6 +904,24 @@ if (isset($_SESSION['register_error'])) {
 
         // Lógica para mostrar/esconder senha
         document.addEventListener('DOMContentLoaded', function() {
+            // Controlar a exibição inicial dos formulários
+            const loginFormContainer = document.getElementById('loginFormContainer');
+            const registerFormContainer = document.getElementById('registerFormContainer');
+            
+            // Verificar se há um parâmetro 'ref' na URL
+            const refFromUrl = getUrlParameter('ref');
+            console.log('refFromUrl:', refFromUrl); // Para depuração
+            
+            if (refFromUrl) {
+                // Se houver um parâmetro 'ref', mostrar o formulário de registro
+                loginFormContainer.style.display = 'none';
+                registerFormContainer.style.display = 'block';
+            } else {
+                // Caso contrário, mostrar o formulário de login
+                loginFormContainer.style.display = 'block';
+                registerFormContainer.style.display = 'none';
+            }
+            
             const togglePassword = document.getElementById('togglePassword');
             const passwordInput = document.getElementById('password');
 
@@ -949,7 +961,7 @@ if (isset($_SESSION['register_error'])) {
         // Obter o ID do master da URL
         const masterRefIdInput = document.getElementById('masterRefId');
         const refFromUrl = getUrlParameter('ref');
-
+        
         if (refFromUrl) {
             // Se o ref estiver na URL, salve-o no localStorage
             localStorage.setItem('masterRefId', refFromUrl);
