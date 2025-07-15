@@ -2,7 +2,6 @@
 <?php
 session_start();
 
-
 // Incluir as classes necessárias
 require_once 'config/database.php';
 require_once 'classes/User.php';
