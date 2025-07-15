@@ -25,7 +25,11 @@ define('LOGO_OVERRIDES', [
       	'Atlético GO Sub-20' => 'https://static.flashscore.com/res/image/data/bitT4dYg-EsONvne7.png',
      'Vasco Sub-20' => 'https://image-service.onefootball.com/transform?w=256&dpr=2&image=https://images.onefootball.com/icons/teams/164/8993.png',
       'Botafogo Sub-17' => 'https://www.ogol.com.br/img/logos/equipas/2233_imgbank_1683624192.png',
-      'Vasco U17' => 'https://www.ogol.com.br/img/logos/equipas/58/2258_logo_20220221150020_vasco.png'
+      'Vasco U17' => 'https://www.ogol.com.br/img/logos/equipas/58/2258_logo_20220221150020_vasco.png',
+      'Operário-PR' => 'https://ssl.gstatic.com/onebox/media/sports/logos/GmLvorr4MqC4aRinQQ4Mdw_96x96.png',
+      'Senegal' => 'https://ssl.gstatic.com/onebox/media/sports/logos/zw3ac5sIbH4DS6zP5auOkQ_96x96.png',
+      'Athletic Club' => 'https://ssl.gstatic.com/onebox/media/sports/logos/S9CYRaQLMRSpASVWqjl17A_96x96.png',
+      'Retrô' => 'https://ssl.gstatic.com/onebox/media/sports/logos/aT3M3q9zvbTH-EZLnYEojw_96x96.png',
 ]);
 
 // Cache simples
