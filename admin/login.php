@@ -2,6 +2,7 @@
 <?php
 session_start();
 
+
 // Incluir as classes necessárias
 require_once 'config/database.php';
 require_once 'classes/User.php';
@@ -99,7 +100,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             if ($result['success']) {
                 $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
                 
-                // Enviar notificação via Telegram para o administrador
+                // Enviar notificação via Telegram para o administrador e redirecionar
                 TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
                 
                 // Redirecionar após o processamento para evitar reenvio do formulário
@@ -107,11 +108,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
                 exit();
             } else {
                 $_SESSION['register_error'] = $result['message'];
+                // Não redirecionar se houver erro, para manter o usuário no formulário de registro
             }
-        } catch (Exception $e) {
-            $_SESSION['register_error'] = "Erro ao criar usuário: " . $e->getMessage();
-        }
-    }
 }
 
 // Verificar se existe uma mensagem de sucesso de login após renovação
@@ -907,22 +905,7 @@ if (isset($_SESSION['register_error'])) {
             // Controlar a exibição inicial dos formulários
             const loginFormContainer = document.getElementById('loginFormContainer');
             const registerFormContainer = document.getElementById('registerFormContainer');
-            
-            // Verificar se há um parâmetro 'ref' na URL
-            const refFromUrl = getUrlParameter('ref');
-            console.log('refFromUrl:', refFromUrl); // Para depuração
-            
-            // Definir a exibição dos formulários com base no parâmetro ref ou mensagens de erro
-            if (refFromUrl || <?php echo isset($_SESSION['register_error']) ? 'true' : 'false'; ?>) {
-                // Se houver um parâmetro ref ou erro de registro, mostrar o formulário de registro
-                loginFormContainer.style.display = 'none';
-                registerFormContainer.style.display = 'block';
-            } else {
-                // Caso contrário, mostrar o formulário de login
-                loginFormContainer.style.display = 'block';
-                registerFormContainer.style.display = 'none';
-            }
-            
+
             const togglePassword = document.getElementById('togglePassword');
             const passwordInput = document.getElementById('password');
 
@@ -948,6 +931,30 @@ if (isset($_SESSION['register_error'])) {
             submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i>';
             submitBtn.appendChild(btnTextSpan);
         });
+        
+        <?php
+        // Lógica para controlar a exibição inicial dos formulários
+        $showRegisterForm = false;
+        
+        // Se houver um erro de registro, mostrar o formulário de registro
+        if (isset($registerError) && !empty($registerError)) {
+            $showRegisterForm = true;
+        }
+        // Se houver um parâmetro 'ref' na URL, também mostrar o formulário de registro
+        elseif (isset($_GET['ref']) && !empty($_GET['ref'])) {
+            $showRegisterForm = true;
+        }
+        
+        if ($showRegisterForm): ?>
+            loginFormContainer.style.display = 'none';
+            registerFormContainer.style.display = 'block';
+        <?php elseif (isset($registerSuccess) && !empty($registerSuccess)): ?>
+            loginFormContainer.style.display = 'block';
+            registerFormContainer.style.display = 'none';
+        <?php else: // Caso padrão: mostrar o formulário de login ?>
+            loginFormContainer.style.display = 'block';
+            registerFormContainer.style.display = 'none';
+        <?php endif; ?>
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
