@@ -820,6 +820,21 @@ if (isset($_SESSION['register_error'])) {
         const showRegisterFormBtn = document.getElementById('showRegisterForm');
         const showLoginFormBtn = document.getElementById('showLoginForm');
 
+        // Verificar se há um parâmetro 'ref' na URL para mostrar o formulário de registro diretamente
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+        
+        // Se houver um parâmetro 'ref' na URL, mostrar o formulário de registro diretamente
+        const refFromUrl = getUrlParameter('ref');
+        if (refFromUrl) {
+            loginFormContainer.style.display = 'none';
+            registerFormContainer.style.display = 'block';
+        }
+
         if (showRegisterFormBtn) {
             showRegisterFormBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -925,13 +940,6 @@ if (isset($_SESSION['register_error'])) {
         });
 
         // Função para obter parâmetro da URL
-        function getUrlParameter(name) {
-            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-            var results = regex.exec(location.search);
-            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-        }
-
         // Obter o ID do master da URL
         const masterRefIdInput = document.getElementById('masterRefId');
         const refFromUrl = getUrlParameter('ref');
