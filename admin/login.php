@@ -101,6 +101,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
                 
                 // Enviar notificação via Telegram para o administrador
                 TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
+                
+                // Redirecionar após o processamento para evitar reenvio do formulário
+                header("Location: login.php");
+                exit();
             } else {
                 $_SESSION['register_error'] = $result['message'];
             }
@@ -108,10 +112,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             $_SESSION['register_error'] = "Erro ao criar usuário: " . $e->getMessage();
         }
     }
-    
-    // Redirecionar após o processamento para evitar reenvio do formulário
-    header("Location: login.php");
-    exit();
 }
 
 // Verificar se existe uma mensagem de sucesso de login após renovação
@@ -912,8 +912,9 @@ if (isset($_SESSION['register_error'])) {
             const refFromUrl = getUrlParameter('ref');
             console.log('refFromUrl:', refFromUrl); // Para depuração
             
-            if (refFromUrl) {
-                // Se houver um parâmetro 'ref', mostrar o formulário de registro
+            // Definir a exibição dos formulários com base no parâmetro ref ou mensagens de erro
+            if (refFromUrl || <?php echo isset($_SESSION['register_error']) ? 'true' : 'false'; ?>) {
+                // Se houver um parâmetro ref ou erro de registro, mostrar o formulário de registro
                 loginFormContainer.style.display = 'none';
                 registerFormContainer.style.display = 'block';
             } else {
