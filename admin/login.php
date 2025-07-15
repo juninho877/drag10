@@ -110,6 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
                 // Não redirecionar se houver erro, para manter o usuário no formulário de registro
             }
         }
+    }
 }
 
 // Verificar se existe uma mensagem de sucesso de login após renovação
