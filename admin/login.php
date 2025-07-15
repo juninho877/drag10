@@ -93,22 +93,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             }
         }
 
-        try {
-            $user = new User();
-            $result = $user->createUser($userData);
-            if ($result['success']) {
-                $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
-                
-                // Enviar notificação via Telegram para o administrador e redirecionar
+        $user = new User();
+        $result = $user->createUser($userData);
+        if ($result['success']) {
+            $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
+            
+            // Enviar notificação via Telegram para o administrador e redirecionar
+            try {
                 TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
-                
-                // Redirecionar após o processamento para evitar reenvio do formulário
-                header("Location: login.php");
-                exit();
-            } else {
-                $_SESSION['register_error'] = $result['message'];
-                // Não redirecionar se houver erro, para manter o usuário no formulário de registro
+            } catch (Exception $e) {
+                // Silenciosamente ignorar erros de notificação
+                error_log("Erro ao enviar notificação: " . $e->getMessage());
             }
+            
+            // Redirecionar após o processamento para evitar reenvio do formulário
+            header("Location: login.php");
+            exit();
+        } else {
+            $_SESSION['register_error'] = $result['message'];
+            // Não redirecionar se houver erro, para manter o usuário no formulário de registro
         }
     }
 }
