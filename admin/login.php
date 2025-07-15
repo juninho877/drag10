@@ -684,7 +684,7 @@ if (isset($_SESSION['register_error'])) {
                 </div>
             </div>
             
-            <div class="login-form" id="registerFormContainer" style="display: none;">
+            <div class="login-form" id="registerFormContainer">
                 <div class="welcome-text">
                     <h3>Crie sua conta grátis!</h3>
                     <p>Teste o sistema por 2 dias sem compromisso.</p>
@@ -817,8 +817,6 @@ if (isset($_SESSION['register_error'])) {
         // Form Toggling
         const loginFormContainer = document.getElementById('loginFormContainer');
         const registerFormContainer = document.getElementById('registerFormContainer');
-        const showRegisterFormBtn = document.getElementById('showRegisterForm');
-        const showLoginFormBtn = document.getElementById('showLoginForm');
 
         // Verificar se há um parâmetro 'ref' na URL para mostrar o formulário de registro diretamente
         function getUrlParameter(name) {
@@ -830,11 +828,19 @@ if (isset($_SESSION['register_error'])) {
         
         // Se houver um parâmetro 'ref' na URL, mostrar o formulário de registro diretamente
         const refFromUrl = getUrlParameter('ref');
+        console.log('refFromUrl:', refFromUrl); // Para depuração
+        
         if (refFromUrl) {
             loginFormContainer.style.display = 'none';
             registerFormContainer.style.display = 'block';
+        } else {
+            loginFormContainer.style.display = 'block';
+            registerFormContainer.style.display = 'none';
         }
 
+        const showRegisterFormBtn = document.getElementById('showRegisterForm');
+        const showLoginFormBtn = document.getElementById('showLoginForm');
+        
         if (showRegisterFormBtn) {
             showRegisterFormBtn.addEventListener('click', function(e) {
                 e.preventDefault();
