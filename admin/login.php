@@ -19,7 +19,7 @@ try {
     $erro = "Erro de conexão com o banco de dados. Verifique as configurações.";
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["register_action"])) {
     $username = trim($_POST["username"]);
     $password = trim($_POST["password"]);
 
