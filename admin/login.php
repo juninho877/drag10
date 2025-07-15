@@ -20,8 +20,8 @@ try {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = trim($_POST["username"]);
-    $password = trim($_POST["password"]);
+    $username = isset($_POST["username"]) ? trim($_POST["username"]) : '';
+    $password = isset($_POST["password"]) ? trim($_POST["password"]) : '';
 
     try {
         $user = new User();
