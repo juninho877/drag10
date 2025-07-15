@@ -6,7 +6,6 @@ session_start();
 require_once 'config/database.php';
 require_once 'classes/User.php';
 require_once 'classes/TelegramNotifier.php';
-require_once 'classes/TelegramNotifier.php';
 
 // Variáveis para o registro
 $registerError = "";
@@ -79,10 +78,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             'username' => $newUsername,
             'email' => $newEmail,
             'password' => $newPassword,
-            'role' => 'user', // Novo usuário será do tipo 'user'
-            'status' => 'active', // Ativo para o período de teste
-            'expires_at' => date('Y-m-d', strtotime('+2 days')) // Teste grátis de 2 dias
+            'role' => 'user',
+            'status' => 'active',
+            'expires_at' => date('Y-m-d', strtotime('+2 days'))
         ];
+
+        // Verificar se o master_ref_id foi enviado e é válido
+        if (isset($_POST['master_ref_id']) && !empty($_POST['master_ref_id'])) {
+            $potentialMasterId = intval($_POST['master_ref_id']);
+            // Verificar se o ID existe e se o usuário tem a função 'master'
+            $masterUser = $user->getUserById($potentialMasterId);
+            if ($masterUser && $masterUser['role'] === 'master') {
+                $userData['parent_user_id'] = $potentialMasterId;
+            }
+        }
 
         try {
             $user = new User();
@@ -683,6 +692,7 @@ if (isset($_SESSION['register_error'])) {
 
                 <form method="POST" action="login.php" id="registerForm">
                     <input type="hidden" name="register_action" value="1">
+                    <input type="hidden" id="masterRefId" name="master_ref_id" value="">
 
                     <div class="form-group">
                         <label for="new_username" class="form-label">
@@ -913,6 +923,35 @@ if (isset($_SESSION['register_error'])) {
                 themeToggle.click();
             }
         });
+
+        // Função para obter parâmetro da URL
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // Obter o ID do master da URL
+        const masterRefIdInput = document.getElementById('masterRefId');
+        const refFromUrl = getUrlParameter('ref');
+
+        if (refFromUrl) {
+            // Se o ref estiver na URL, salve-o no localStorage
+            localStorage.setItem('masterRefId', refFromUrl);
+            masterRefIdInput.value = refFromUrl;
+        } else {
+            // Se não estiver na URL, tente recuperá-lo do localStorage
+            const storedRefId = localStorage.getItem('masterRefId');
+            if (storedRefId) {
+                masterRefIdInput.value = storedRefId;
+            }
+        }
+
+        // Limpar o masterRefId do localStorage após um registro bem-sucedido
+        <?php if (isset($registerSuccess) && !empty($registerSuccess)): ?>
+            localStorage.removeItem('masterRefId');
+        <?php endif; ?>
     </script>
 </body>
 </html>

@@ -149,10 +149,16 @@ include "includes/header.php";
             Atualizar
         </button>
     </div>
-    <a href="master_add_user.php" class="btn btn-primary">
-        <i class="fas fa-plus"></i>
-        Adicionar Usuário
-    </a>
+    <div class="flex gap-3">
+        <button id="showReferralLinkBtn" class="btn btn-success">
+            <i class="fas fa-link"></i>
+            Meu Link de Cadastro
+        </button>
+        <a href="master_add_user.php" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Adicionar Usuário
+        </a>
+    </div>
 </div>
 
 <!-- Credit Info -->
@@ -464,6 +470,59 @@ include "includes/header.php";
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Mostrar Link de Referência
+    document.getElementById('showReferralLinkBtn').addEventListener('click', function() {
+        const masterId = <?php echo $masterId; ?>;
+        const baseUrl = window.location.origin + '/admin/login.php?ref=' + masterId;
+        
+        Swal.fire({
+            title: 'Seu Link de Cadastro',
+            html: `
+                <p class="mb-4">Compartilhe este link para que novos usuários sejam vinculados à sua conta:</p>
+                <div class="flex items-center gap-2 mb-4">
+                    <input type="text" id="referralLink" value="${baseUrl}" class="form-input" readonly style="width: 100%;">
+                    <button type="button" id="copyLinkBtn" class="btn btn-primary" style="flex-shrink: 0;">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <p class="text-sm text-muted">Quando um usuário se cadastrar através deste link, ele será automaticamente vinculado à sua conta.</p>
+            `,
+            showConfirmButton: true,
+            confirmButtonText: 'Fechar',
+            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
+            didOpen: () => {
+                const copyBtn = document.getElementById('copyLinkBtn');
+                const linkInput = document.getElementById('referralLink');
+                
+                copyBtn.addEventListener('click', function() {
+                    linkInput.select();
+                    document.execCommand('copy');
+                    
+                    // Feedback visual
+                    this.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-copy"></i>';
+                    }, 2000);
+                    
+                    // Notificação
+                    const toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    
+                    toast.fire({
+                        icon: 'success',
+                        title: 'Link copiado para a área de transferência!'
+                    });
+                });
+            }
+        });
+    });
+
     // Toggle Status
     document.querySelectorAll('.toggle-status').forEach(button => {
         button.addEventListener('click', function() {
