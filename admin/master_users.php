@@ -352,6 +352,7 @@ include "includes/header.php";
 <style>
     .table-responsive {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .users-table {
@@ -627,6 +628,88 @@ include "includes/header.php";
 
     .custom-cancel-button:hover {
         background: var(--bg-secondary) !important;
+    }
+    
+    /* Mobile Responsive Design */
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .filter-form .grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .flex.justify-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .flex.justify-between .flex {
+            width: 100%;
+        }
+        
+        .flex.justify-between .btn {
+            width: 100%;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .card-title {
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-mobile {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .user-info {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .user-avatar-small {
+            margin: 0 auto 0.5rem;
+        }
+        
+        .users-table th:nth-child(3),
+        .users-table td:nth-child(3),
+        .users-table th:nth-child(6),
+        .users-table td:nth-child(6) {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .users-table th:nth-child(5),
+        .users-table td:nth-child(5) {
+            display: none;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
     }
 
     /* Estilos para o modal de credenciais */

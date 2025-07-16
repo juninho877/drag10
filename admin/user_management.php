@@ -43,6 +43,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             ]);
             exit;
             
+        case 'create_trial_user':
+            // Inicializar AdminSettings para obter o número de dias de teste
+            $adminSettings = new AdminSettings();
+            $trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
+            
+            $username = trim($_POST['username']);
+            $email = trim($_POST['email']);
+            $password = trim($_POST['password']);
+            
+            if (empty($username) || empty($password) || empty($email)) {
+                echo json_encode(['success' => false, 'message' => 'Nome de usuário, email e senha são obrigatórios']);
+                exit;
+            }
+            
+            if (strlen($password) < 6) {
+                echo json_encode(['success' => false, 'message' => 'A senha deve ter pelo menos 6 caracteres']);
+                exit;
+            }
+            
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                echo json_encode(['success' => false, 'message' => 'Email inválido']);
+                exit;
+            }
+            
+            $data = [
+                'username' => $username,
+                'email' => $email,
+                'password' => $password,
+                'role' => 'user',
+                'status' => 'trial',
+                'expires_at' => date('Y-m-d', strtotime("+{$trialDays} days"))
+            ];
+            
+            $result = $user->createUser($data);
+            echo json_encode($result);
+            exit;
+            
         case 'change_status':
             $result = $user->changeStatus($_POST['user_id'], $_POST['status']);
             echo json_encode($result);
@@ -86,45 +123,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             
         case 'reset_image_counts':
             $result = $user->resetAllImageChangeCounts();
-            echo json_encode($result);
-            exit;
-            
-        case 'create_trial_user':
-            header('Content-Type: application/json');
-            
-            // Inicializar AdminSettings para obter o número de dias de teste
-            $adminSettings = new AdminSettings();
-            $trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
-            
-            $username = trim($_POST['username']);
-            $email = trim($_POST['email']);
-            $password = trim($_POST['password']);
-            
-            if (empty($username) || empty($password) || empty($email)) {
-                echo json_encode(['success' => false, 'message' => 'Nome de usuário, email e senha são obrigatórios']);
-                exit;
-            }
-            
-            if (strlen($password) < 6) {
-                echo json_encode(['success' => false, 'message' => 'A senha deve ter pelo menos 6 caracteres']);
-                exit;
-            }
-            
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                echo json_encode(['success' => false, 'message' => 'Email inválido']);
-                exit;
-            }
-            
-            $data = [
-                'username' => $username,
-                'email' => $email,
-                'password' => $password,
-                'role' => 'user',
-                'status' => 'trial',
-                'expires_at' => date('Y-m-d', strtotime("+{$trialDays} days"))
-            ];
-            
-            $result = $user->createUser($data);
             echo json_encode($result);
             exit;
     }
@@ -708,6 +706,7 @@ include "includes/header.php";
 <style>
     .table-responsive {
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .users-table {
@@ -989,6 +988,85 @@ include "includes/header.php";
         .stats-mobile {
             grid-template-columns: repeat(2, 1fr);
             gap: 1rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .btn-action {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .filter-form .grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .form-actions .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .flex.justify-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .flex.justify-between .flex {
+            width: 100%;
+        }
+        
+        .flex.justify-between .btn {
+            width: 100%;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .card-title {
+            margin-bottom: 0.5rem;
+        }
+        
+        .stats-cards {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .user-info {
+            flex-direction: column;
+            align-items: flex-start;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .user-avatar-small {
+            margin: 0 auto 0.5rem;
+        }
+        
+        .users-table th:nth-child(3),
+        .users-table td:nth-child(3),
+        .users-table th:nth-child(6),
+        .users-table td:nth-child(6) {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .users-table th:nth-child(5),
+        .users-table td:nth-child(5) {
+            display: none;
+        }
+        
+        .card-body {
+            padding: 1rem;
         }
     }
 
