@@ -992,6 +992,11 @@ if ($isTempUser) {
                         <i class="fas fa-exclamation-circle"></i>
                         Conta expirada
                     </span>
+                    <?php elseif (isset($userData) && $userData && $userData['status'] === 'trial'): ?>
+                    <span class="trial-badge">
+                        <i class="fas fa-user-clock"></i>
+                        Período de Teste
+                    </span>
                     <?php endif; ?>
                     <?php if ($isLoggedIn && isset($loggedInUserData) && $loggedInUserData): ?>
                     <span class="expiry-date-badge">
@@ -1052,6 +1057,24 @@ if ($isTempUser) {
         font-size: 0.75rem;
         font-weight: 600;
         margin-right: 1rem;
+    }
+    
+    .trial-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--warning-50);
+        color: var(--warning-600);
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 1rem;
+    }
+    
+    [data-theme="dark"] .trial-badge {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-400);
     }
     
     .expiry-date-badge {
