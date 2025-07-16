@@ -136,7 +136,7 @@ $stmt = $db->prepare("
     WHERE id = 1
 ");
 $stmt->execute();
-$globalLimits = $stmt->fetch();
+$globalLimits = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Valores padrão se não encontrados
 if (!$globalLimits) {
@@ -153,49 +153,202 @@ $pageTitle = "Gerenciamento de Usuários";
 include "includes/header.php";
 ?>
 
-<!-- Ajuste para viewport em dispositivos móveis -->
 <style>
-@viewport {
-    width: device-width;
-    zoom: 1.0;
-}
+    /* === ESTILOS GERAIS === */
+    html, body {
+        width: 100%;
+        overflow-x: hidden; /* Evita a barra de rolagem horizontal na página inteira */
+    }
 
-@-ms-viewport {
-    width: device-width;
-}
-
-html, body {
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-.table-container {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-@media (max-width: 768px) {
-    .card-body {
-        padding: 1rem;
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto; /* Permite rolar a tabela horizontalmente se ela for muito larga */
+        -webkit-overflow-scrolling: touch; /* Melhora a rolagem em iOS */
     }
     
-    .btn {
-        padding: 0.5rem 0.75rem;
+    .users-table {
+        width: 100%;
+        min-width: 900px; /* Define uma largura mínima para a tabela, forçando a rolagem em vez de espremer o conteúdo */
+        border-collapse: collapse;
         font-size: 0.875rem;
     }
-    
-    .form-input {
-        font-size: 16px; /* Evita zoom automático em iOS */
+
+    .users-table th,
+    .users-table td {
+        padding: 1rem 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap; /* Impede que o conteúdo das células quebre linha */
     }
     
-    .modal-content {
-        width: 95%;
-        max-width: 95%;
-        margin: 0 auto;
+    .users-table th {
+        background: var(--bg-secondary);
+        font-weight: 600;
+        color: var(--text-primary);
     }
-}
+    
+    .users-table tbody tr:hover {
+        background: var(--bg-secondary);
+    }
+    
+    .user-info { display: flex; align-items: center; gap: 0.75rem; }
+    .user-avatar-small { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary-500), var(--primary-600)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.75rem; flex-shrink: 0; }
+    .role-badge, .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+    .role-admin { background: var(--warning-50); color: var(--warning-600); }
+    .role-master { background: var(--primary-50); color: var(--primary-600); }
+    .role-user { background: var(--success-50); color: var(--success-600); }
+    .status-active { background: var(--success-50); color: var(--success-600); }
+    .status-inactive { background: var(--danger-50); color: var(--danger-600); }
+    .status-expired { background: var(--warning-50); color: var(--warning-600); }
+    .action-buttons { display: flex; gap: 0.5rem; }
+    .btn-action { width: 32px; height: 32px; border: none; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: var(--transition); text-decoration: none; }
+    .limits-display { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .limit-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; background: var(--bg-tertiary); border-radius: var(--border-radius-sm); font-size: 0.75rem; color: var(--text-secondary); }
+    .info-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: var(--bg-tertiary); border-radius: var(--border-radius-sm); color: var(--text-secondary); font-size: 0.875rem; }
+    .form-actions { display: flex; gap: 1rem; margin-top: 1rem; }
+
+    /* === LAYOUT MOBILE: CARDS DE USUÁRIO === */
+    .mobile-users-grid {
+        display: none; /* Escondido por padrão */
+    }
+    .mobile-user-card { background: var(--bg-primary); border: 1px solid var(--border-color); border-radius: var(--border-radius); padding: 1.5rem; box-shadow: var(--shadow-sm); margin-bottom: 1rem; }
+    .mobile-card-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+    .mobile-card-info { flex: 1; }
+    .mobile-card-info h3 { font-size: 1.125rem; font-weight: 600; margin-bottom: 0.25rem; }
+    .mobile-card-info p { color: var(--text-secondary); font-size: 0.875rem; word-break: break-all; }
+    .mobile-card-details { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .mobile-detail-item { display: flex; flex-direction: column; gap: 0.25rem; }
+    .mobile-detail-label { font-size: 0.75rem; font-weight: 500; color: var(--text-muted); text-transform: uppercase; }
+    .mobile-card-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem; }
+    .mobile-action-btn { padding: 0.75rem 1rem; border: none; border-radius: var(--border-radius-sm); font-size: 0.875rem; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; text-decoration: none; }
+    .mobile-action-primary { background: var(--primary-500); color: white; }
+    .mobile-action-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color); }
+    .mobile-action-success { background: var(--success-500); color: white; }
+    .mobile-action-warning { background: var(--warning-500); color: white; }
+    .mobile-action-danger { background: var(--danger-500); color: white; }
+    .mobile-credits-section { grid-column: 1 / -1; display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; background: var(--bg-secondary); border-radius: var(--border-radius-sm); }
+    .mobile-limits-display { display: flex; flex-direction: column; gap: 0.5rem; }
+
+
+    /* === MEDIA QUERIES PARA RESPONSIVIDADE === */
+
+    /* Estilos para Telas Médias e Pequenas (Tablets e Celulares) - max-width: 991px */
+    @media (max-width: 991px) {
+        /* ESCONDE a tabela tradicional */
+        .table-responsive {
+            display: none;
+        }
+
+        /* MOSTRA os cards para mobile */
+        .mobile-users-grid {
+            display: block;
+        }
+    }
+
+    /* Estilos para Tablets - max-width: 768px */
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+
+        /* Faz os cards de estatísticas terem 2 colunas */
+        .stats-mobile {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        /* Ajusta o layout dos formulários para uma única coluna */
+        .grid.md\:grid-cols-3, .grid.md\:grid-cols-4 {
+            grid-template-columns: 1fr;
+        }
+
+        .flex.items-center.gap-4 {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .flex.flex-wrap.gap-3 {
+            flex-direction: column;
+        }
+
+        .actions-bar-mobile {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .actions-bar-mobile > div {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 0.75rem; /* Adiciona um espaço entre os botões */
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .btn, .form-actions .btn, .actions-bar-mobile .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* Estilos para Celulares Pequenos - max-width: 480px */
+    @media (max-width: 480px) {
+        /* Cards de estatísticas em uma única coluna */
+        .stats-mobile {
+            grid-template-columns: 1fr;
+        }
+
+        /* Detalhes do card de usuário em uma única coluna */
+        .mobile-card-details {
+            grid-template-columns: 1fr;
+        }
+        
+        /* Botões de ação do card em uma única coluna */
+        .mobile-card-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* === ESTILOS PARA MODAIS (SweetAlert) === */
+    .trial-form-group input, .form-input, .form-select { 
+        font-size: 16px !important; /* Evita zoom automático em iOS */
+    }
+    .swal2-popup {
+        width: 95% !important;
+        max-width: 500px !important;
+    }
+    .custom-modal { border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1); }
+    .trial-user-form { padding: 1rem 0; }
+    .trial-form-group { margin-bottom: 1.25rem; text-align: left; }
+    .trial-form-group label { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .trial-form-group input { width: 100%; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); }
+    .password-input-wrapper { position: relative; }
+    .toggle-password { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; }
+    .trial-info { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px; font-size: 0.875rem; margin-top: 0.5rem; }
+    .credentials-container { padding: 0; }
+    .credentials-header { text-align: center; margin-bottom: 1.5rem; }
+    .credentials-header i { font-size: 3rem; color: var(--success-500); margin-bottom: 1rem; }
+    .credentials-header h3 { font-size: 1.25rem; font-weight: 600; }
+    .credentials-body { background: var(--bg-secondary); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .credential-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+    .credential-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+    .credential-label { font-weight: 600; }
+    .credential-value-container code { padding: 0.5rem 0.75rem; background: var(--bg-tertiary); border-radius: 6px; font-family: monospace; color: var(--primary-500); font-weight: 600; }
+    .credentials-footer { text-align: center; font-size: 0.875rem; color: var(--text-secondary); }
+
+    /* Estilos Dark Theme para os modais */
+    [data-theme="dark"] .role-admin, [data-theme="dark"] .status-expired { background: rgba(245, 158, 11, 0.1); color: var(--warning-400); }
+    [data-theme="dark"] .role-master { background: rgba(59, 130, 246, 0.1); color: var(--primary-400); }
+    [data-theme="dark"] .role-user, [data-theme="dark"] .status-active { background: rgba(34, 197, 94, 0.1); color: var(--success-400); }
+    [data-theme="dark"] .status-inactive { background: rgba(239, 68, 68, 0.1); color: var(--danger-400); }
+    [data-theme="dark"] .btn-primary { background: rgba(59, 130, 246, 0.1); color: var(--primary-400); }
+    [data-theme="dark"] .btn-secondary { background: var(--bg-tertiary); color: var(--text-muted); }
+    [data-theme="dark"] .trial-info { background: rgba(51, 65, 85, 0.5); }
+    [data-theme="dark"] .credential-value-container code { background: rgba(51, 65, 85, 0.8); color: var(--primary-400); }
 </style>
+
 
 <div class="page-header">
     <h1 class="page-title">
@@ -263,7 +416,6 @@ html, body {
     </div>
 </div>
 
-<!-- Trial Days Settings -->
 <div class="card mb-6">
     <div class="card-header">
         <h3 class="card-title">
@@ -276,7 +428,7 @@ html, body {
         <div class="flex items-center gap-4">
             <div class="form-group mb-0 flex-1">
                 <label for="trial_days" class="form-label">Dias de Teste</label>
-                <input type="number" id="trial_days" class="form-input" value="<?php echo $trialDays; ?>" min="1" max="30">
+                <input type="number" id="trial_days" class="form-input" value="<?php echo htmlspecialchars($trialDays); ?>" min="1" max="30">
                 <p class="text-xs text-muted mt-1">Número de dias que novos usuários terão acesso gratuito ao sistema</p>
             </div>
             <div>
@@ -298,8 +450,8 @@ html, body {
         <form method="GET" action="" class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="form-group">
                 <label for="search" class="form-label">Buscar por Nome/Email</label>
-                <input type="text" id="search" name="search" class="form-input" 
-                       value="<?php echo htmlspecialchars($filters['search']); ?>" 
+                <input type="text" id="search" name="search" class="form-input"
+                       value="<?php echo htmlspecialchars($filters['search']); ?>"
                        placeholder="Digite o nome ou email">
             </div>
             
@@ -353,7 +505,7 @@ html, body {
                     <i class="fas fa-image mr-2"></i>
                     Limite de Logos
                 </label>
-                <input type="number" id="global_logo_limit" class="form-input" min="0" value="<?php echo $globalLimits['logo_change_limit']; ?>">
+                <input type="number" id="global_logo_limit" class="form-input" min="0" value="<?php echo htmlspecialchars($globalLimits['logo_change_limit']); ?>">
                 <p class="text-xs text-muted mt-1">Trocas de logo permitidas por dia</p>
             </div>
             
@@ -362,7 +514,7 @@ html, body {
                     <i class="fas fa-film mr-2"></i>
                     Limite de Logos de Filmes
                 </label>
-                <input type="number" id="global_movie_logo_limit" class="form-input" min="0" value="<?php echo $globalLimits['movie_logo_change_limit']; ?>">
+                <input type="number" id="global_movie_logo_limit" class="form-input" min="0" value="<?php echo htmlspecialchars($globalLimits['movie_logo_change_limit']); ?>">
                 <p class="text-xs text-muted mt-1">Trocas de logo de filmes permitidas por dia</p>
             </div>
             
@@ -371,7 +523,7 @@ html, body {
                     <i class="fas fa-image mr-2"></i>
                     Limite de Fundos
                 </label>
-                <input type="number" id="global_background_limit" class="form-input" min="0" value="<?php echo $globalLimits['background_change_limit']; ?>">
+                <input type="number" id="global_background_limit" class="form-input" min="0" value="<?php echo htmlspecialchars($globalLimits['background_change_limit']); ?>">
                 <p class="text-xs text-muted mt-1">Trocas de fundo permitidas por dia</p>
             </div>
         </div>
@@ -413,14 +565,14 @@ html, body {
         </button>
     </div>
 </div>
-        <form id="trialDaysForm" class="flex items-end gap-4">
-        </form>
+
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Lista de Usuários</h3>
         <p class="card-subtitle">Gerencie todos os usuários do sistema</p>
     </div>
     <div class="card-body">
+        
         <div class="table-responsive">
             <table class="users-table">
                 <thead>
@@ -444,7 +596,6 @@ html, body {
                         </tr>
                     <?php else: ?>
                         <?php foreach ($users as $userData): 
-                            // Verificar se o usuário está expirado
                             $isExpired = $userData['expires_at'] && strtotime($userData['expires_at']) < time();
                         ?>
                             <tr data-user-id="<?php echo $userData['id']; ?>">
@@ -624,14 +775,9 @@ html, body {
                                 <span class="role-badge role-<?php echo $userData['role']; ?>">
                                     <?php 
                                     switch ($userData['role']) {
-                                        case 'admin':
-                                            echo 'Administrador';
-                                            break;
-                                        case 'master':
-                                            echo 'Master';
-                                            break;
-                                        default:
-                                            echo 'Usuário';
+                                        case 'admin': echo 'Administrador'; break;
+                                        case 'master': echo 'Master'; break;
+                                        default: echo 'Usuário'; break;
                                     }
                                     ?>
                                 </span>
@@ -748,643 +894,50 @@ html, body {
     </div>
 </div>
 
-<style>
-    .table-responsive {
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .users-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.875rem;
-    }
-
-    .users-table th,
-    .users-table td {
-        padding: 1rem 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .users-table th {
-        background: var(--bg-secondary);
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    .users-table tbody tr:hover {
-        background: var(--bg-secondary);
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .user-avatar-small {
-        width: 32px;
-        height: 32px;
-        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 600;
-        font-size: 0.75rem;
-    }
-
-    .role-badge,
-    .status-badge {
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-
-    .role-admin {
-        background: var(--warning-50);
-        color: var(--warning-600);
-    }
-    
-    .role-master {
-        background: var(--primary-50);
-        color: var(--primary-600);
-    }
-
-    .role-user {
-        background: var(--success-50);
-        color: var(--success-600);
-    }
-
-    .status-active {
-        background: var(--success-50);
-        color: var(--success-600);
-    }
-
-    .status-inactive {
-        background: var(--danger-50);
-        color: var(--danger-600);
-    }
-    
-    .status-expired {
-        background: var(--warning-50);
-        color: var(--warning-600);
-    }
-
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-    }
-
-    .btn-action {
-        width: 32px;
-        height: 32px;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: var(--transition);
-        text-decoration: none;
-    }
-
-    .btn-edit {
-        background: var(--primary-50);
-        color: var(--primary-600);
-    }
-
-    .btn-edit:hover {
-        background: var(--primary-100);
-    }
-
-    .btn-success {
-        background: var(--success-50);
-        color: var(--success-600);
-    }
-
-    .btn-success:hover {
-        background: var(--success-100);
-    }
-
-    .btn-warning {
-        background: var(--warning-50);
-        color: var(--warning-600);
-    }
-
-    .btn-warning:hover {
-        background: var(--warning-100);
-    }
-
-    .btn-danger {
-        background: var(--danger-50);
-        color: var(--danger-600);
-    }
-
-    .btn-danger:hover {
-        background: var(--danger-100);
-    }
-    
-    .btn-primary {
-        background: var(--primary-50);
-        color: var(--primary-600);
-    }
-    
-    .btn-primary:hover {
-        background: var(--primary-100);
-    }
-    
-    .btn-secondary {
-        background: var(--bg-tertiary);
-        color: var(--text-secondary);
-    }
-    
-    .btn-secondary:hover {
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-    }
-    
-    .form-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-    
-    .info-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: var(--bg-tertiary);
-        border-radius: var(--border-radius-sm);
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-    }
-    
-    .limits-display {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .limit-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        padding: 0.25rem 0.5rem;
-        background: var(--bg-tertiary);
-        border-radius: var(--border-radius-sm);
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-    }
-    
-    .mobile-limits-display {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-    
-    .mobile-limits-display .limit-badge {
-        justify-content: space-between;
-    }
-
-    /* Dark theme adjustments */
-    [data-theme="dark"] .role-admin {
-        background: rgba(245, 158, 11, 0.1);
-        color: var(--warning-400);
-    }
-    
-    [data-theme="dark"] .role-master {
-        background: rgba(59, 130, 246, 0.1);
-        color: var(--primary-400);
-    }
-
-    [data-theme="dark"] .role-user {
-        background: rgba(34, 197, 94, 0.1);
-        color: var(--success-400);
-    }
-
-    [data-theme="dark"] .status-active {
-        background: rgba(34, 197, 94, 0.1);
-        color: var(--success-400);
-    }
-
-    [data-theme="dark"] .status-inactive {
-        background: rgba(239, 68, 68, 0.1);
-        color: var(--danger-400);
-    }
-    
-    [data-theme="dark"] .status-expired {
-        background: rgba(245, 158, 11, 0.1);
-        color: var(--warning-400);
-    }
-    
-    [data-theme="dark"] .btn-primary {
-        background: rgba(59, 130, 246, 0.1);
-        color: var(--primary-400);
-    }
-    
-    [data-theme="dark"] .btn-secondary {
-        background: var(--bg-tertiary);
-        color: var(--text-muted);
-    }
-
-    /* Mobile Responsive Design */
-    @media (max-width: 768px) {
-        /* Hide table on mobile */
-        .table-responsive {
-            display: none;
-        }
-        
-        /* Show mobile cards */
-        .mobile-users-grid {
-            display: flex !important;
-            flex-direction: column;
-        }
-        
-        /* Actions Bar Mobile */
-        .actions-bar-mobile {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-        }
-        
-        .actions-bar-mobile .btn {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        /* Form actions mobile */
-        .form-actions {
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        
-        .form-actions .btn {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        /* Stats cards mobile */
-        .stats-mobile {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        .action-buttons {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .btn-action {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .filter-form .grid {
-            grid-template-columns: 1fr !important;
-        }
-        
-        .form-actions {
-            flex-direction: column;
-            width: 100%;
-        }
-        
-        .form-actions .btn {
-            width: 100%;
-            margin-bottom: 0.5rem;
-        }
-        
-        .flex.justify-between {
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .flex.justify-between .flex {
-            width: 100%;
-        }
-        
-        .flex.justify-between .btn {
-            width: 100%;
-        }
-        
-        .card-header {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        
-        .card-title {
-            margin-bottom: 0.5rem;
-        }
-        
-        .stats-cards {
-            grid-template-columns: 1fr !important;
-        }
-        
-        .user-info {
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: center;
-            width: 100%;
-        }
-        
-        .user-avatar-small {
-            margin: 0 auto 0.5rem;
-        }
-        
-        .users-table th:nth-child(3),
-        .users-table td:nth-child(3),
-        .users-table th:nth-child(6),
-        .users-table td:nth-child(6) {
-            display: none;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .users-table th:nth-child(5),
-        .users-table td:nth-child(5) {
-            display: none;
-        }
-        
-        .card-body {
-            padding: 1rem;
-        }
-    }
-
-    @media (min-width: 769px) {
-        /* Hide mobile cards on desktop */
-        .mobile-users-grid {
-            display: none;
-        }
-    }
-
-    /* Mobile User Cards */
-    .mobile-users-grid {
-        display: none;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .mobile-user-card {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius);
-        padding: 1.5rem;
-        box-shadow: var(--shadow-sm);
-        margin-bottom: 1rem;
-        min-height: 200px; /* Para garantir que seja visível */
-    }
-
-    .mobile-user-card:hover {
-        box-shadow: var(--shadow-md);
-    }
-
-    .mobile-card-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .mobile-card-info {
-        flex: 1;
-    }
-
-    .mobile-card-info h3 {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: 0.25rem;
-    }
-
-    .mobile-card-info p {
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-    }
-
-    .mobile-card-details {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .mobile-detail-item {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-    }
-
-    .mobile-detail-label {
-        font-size: 0.75rem;
-        font-weight: 500;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .mobile-detail-value {
-        font-size: 0.875rem;
-        color: var(--text-primary);
-    }
-
-    .mobile-card-actions {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-        margin-top: 1rem;
-    }
-
-    .mobile-action-btn {
-        padding: 0.75rem 1rem;
-        border: none;
-        border-radius: var(--border-radius-sm);
-        font-size: 0.875rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: var(--transition);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        text-decoration: none;
-    }
-
-    .mobile-action-btn i {
-        font-size: 1rem;
-    }
-
-    .mobile-action-primary {
-        background: var(--primary-500);
-        color: white;
-    }
-
-    .mobile-action-primary:hover {
-        background: var(--primary-600);
-    }
-
-    .mobile-action-secondary {
-        background: var(--bg-tertiary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-
-    .mobile-action-secondary:hover {
-        background: var(--bg-secondary);
-    }
-
-    .mobile-action-success {
-        background: var(--success-500);
-        color: white;
-    }
-
-    .mobile-action-success:hover {
-        background: var(--success-600);
-    }
-
-    .mobile-action-warning {
-        background: var(--warning-500);
-        color: white;
-    }
-
-    .mobile-action-warning:hover {
-        background: var(--warning-600);
-    }
-
-    .mobile-action-danger {
-        background: var(--danger-500);
-        color: white;
-    }
-
-    .mobile-action-danger:hover {
-        background: var(--danger-600);
-    }
-
-    .mobile-credits-section {
-        grid-column: 1 / -1;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        padding: 0.75rem;
-        background: var(--bg-secondary);
-        border-radius: var(--border-radius-sm);
-    }
-
-    .mobile-credits-section .btn-action {
-        width: 36px;
-        height: 36px;
-    }
-
-    /* Small mobile screens */
-    @media (max-width: 480px) {
-        .mobile-card-details {
-            grid-template-columns: 1fr;
-            gap: 0.75rem;
-        }
-        
-        .mobile-card-actions {
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
-        
-        .mobile-user-card {
-            padding: 1rem;
-        }
-        
-        .mobile-card-header {
-            flex-direction: column;
-            text-align: center;
-            gap: 0.75rem;
-        }
-        
-        .mobile-card-id {
-            order: -1;
-        }
-        
-        .stats-mobile {
-            grid-template-columns: 1fr;
-        }
-    }
-</style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Ajustar layout para dispositivos móveis
-    function adjustForMobile() {
-        const isMobile = window.innerWidth <= 768;
-        
-        // Adicionar classes para elementos que precisam de ajustes em mobile
-        document.querySelectorAll('.action-buttons').forEach(el => {
-            el.classList.toggle('flex-wrap', isMobile);
-        });
-        
-        document.querySelectorAll('.btn-action').forEach(el => {
-            el.classList.toggle('w-full-mobile', isMobile);
-            el.classList.toggle('mb-mobile-2', isMobile);
-        });
-        
-        // Garantir que tabelas tenham scroll horizontal
-        document.querySelectorAll('.table-responsive').forEach(el => {
-            if (!el.parentElement.classList.contains('mobile-scroll-container') && isMobile) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'mobile-scroll-container';
-                el.parentNode.insertBefore(wrapper, el);
-                wrapper.appendChild(el);
-            }
-        });
-    }
-    
-    // Executar ajustes iniciais e em cada redimensionamento
-    adjustForMobile();
-    window.addEventListener('resize', adjustForMobile);
     
     // Criar usuário de teste
     document.getElementById('createTrialUserBtn').addEventListener('click', function() {
         Swal.fire({
             title: 'Criar Usuário de Teste',
             html: `<div class="trial-user-form">
-                    <div class="trial-form-group">
-                        <label for="trial_username">
-                            <i class="fas fa-user"></i>
-                            Nome de Usuário
-                        </label>
-                        <input type="text" id="trial_username" placeholder="Digite o nome de usuário" required>
-                    </div>
-                    <div class="trial-form-group">
-                        <label for="trial_email">
-                            <i class="fas fa-envelope"></i>
-                            Email
-                        </label>
-                        <input type="email" id="trial_email" placeholder="Digite o email" required>
-                    </div>
-                    <div class="trial-form-group">
-                        <label for="trial_password">
-                            <i class="fas fa-lock"></i>
-                            Senha
-                        </label>
-                        <div class="password-input-wrapper">
-                            <input type="password" id="trial_password" placeholder="Mínimo de 6 caracteres" required>
-                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('trial_password')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="trial-info">
-                        <i class="fas fa-info-circle"></i>
-                        <span>O usuário terá acesso por <strong>${<?php echo $trialDays; ?>}</strong> dias de teste</span>
-                    </div>
-                </div>`,
+                       <div class="trial-form-group">
+                           <label for="trial_username">
+                               <i class="fas fa-user"></i>
+                               Nome de Usuário
+                           </label>
+                           <input type="text" id="trial_username" placeholder="Digite o nome de usuário" required>
+                       </div>
+                       <div class="trial-form-group">
+                           <label for="trial_email">
+                               <i class="fas fa-envelope"></i>
+                               Email
+                           </label>
+                           <input type="email" id="trial_email" placeholder="Digite o email" required>
+                       </div>
+                       <div class="trial-form-group">
+                           <label for="trial_password">
+                               <i class="fas fa-lock"></i>
+                               Senha
+                           </label>
+                           <div class="password-input-wrapper">
+                               <input type="password" id="trial_password" placeholder="Mínimo de 6 caracteres" required>
+                               <button type="button" class="toggle-password" onclick="togglePasswordVisibility('trial_password')">
+                                   <i class="fas fa-eye"></i>
+                               </button>
+                           </div>
+                       </div>
+                       <div class="trial-info">
+                           <i class="fas fa-info-circle"></i>
+                           <span>O usuário terá acesso por <strong>${<?php echo $trialDays; ?>}</strong> dias de teste</span>
+                       </div>
+                   </div>`,
             showCancelButton: true,
             confirmButtonText: 'Criar',
             cancelButtonText: 'Cancelar',
-            width: window.innerWidth <= 768 ? '95%' : '500px',
             customClass: {
                 popup: 'custom-modal',
                 confirmButton: 'custom-confirm-button',
@@ -1431,40 +984,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
                             title: 'Usuário Criado!',
                             html: `<div class="credentials-container">
-                                    <div class="credentials-header">
-                                        <i class="fas fa-check-circle"></i>
-                                        <h3>Usuário de teste criado com sucesso!</h3>
-                                    </div>
-                                    <div class="credentials-body">
-                                        <div class="credential-item">
-                                            <span class="credential-label">Usuário:</span>
-                                            <div class="credential-value-container">
-                                                <code>${username}</code>
-                                            </div>
-                                        </div>
-                                        <div class="credential-item">
-                                            <span class="credential-label">Email:</span>
-                                            <div class="credential-value-container">
-                                                <code>${email}</code>
-                                            </div>
-                                        </div>
-                                        <div class="credential-item">
-                                            <span class="credential-label">Senha:</span>
-                                            <div class="credential-value-container">
-                                                <code>${password}</code>
-                                            </div>
-                                        </div>
-                                        <div class="credential-item">
-                                            <span class="credential-label">Validade:</span>
-                                            <div class="credential-value-container">
-                                                <code>${<?php echo $trialDays; ?>} dias</code>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="credentials-footer">
-                                        <p>Copie estas informações para compartilhar com o usuário.</p>
-                                    </div>
-                                </div>`,
+                                       <div class="credentials-header">
+                                           <i class="fas fa-check-circle"></i>
+                                           <h3>Usuário de teste criado com sucesso!</h3>
+                                       </div>
+                                       <div class="credentials-body">
+                                           <div class="credential-item">
+                                               <span class="credential-label">Usuário:</span>
+                                               <div class="credential-value-container">
+                                                   <code>${username}</code>
+                                               </div>
+                                           </div>
+                                           <div class="credential-item">
+                                               <span class="credential-label">Email:</span>
+                                               <div class="credential-value-container">
+                                                   <code>${email}</code>
+                                               </div>
+                                           </div>
+                                           <div class="credential-item">
+                                               <span class="credential-label">Senha:</span>
+                                               <div class="credential-value-container">
+                                                   <code>${password}</code>
+                                               </div>
+                                           </div>
+                                           <div class="credential-item">
+                                               <span class="credential-label">Validade:</span>
+                                               <div class="credential-value-container">
+                                                   <code>${<?php echo $trialDays; ?>} dias</code>
+                                               </div>
+                                           </div>
+                                       </div>
+                                       <div class="credentials-footer">
+                                           <p>Copie estas informações para compartilhar com o usuário.</p>
+                                       </div>
+                                   </div>`,
                             icon: 'success',
                             confirmButtonText: 'Copiar Credenciais',
                             customClass: {
@@ -1874,62 +1427,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // Configuração de dias de teste
-    document.getElementById('trialDaysForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const trialDays = document.getElementById('trial_days').value;
-        
-        if (trialDays < 1 || trialDays > 30) {
-            Swal.fire({
-                title: 'Erro!',
-                text: 'O número de dias deve estar entre 1 e 30',
-                icon: 'error',
-                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
-            });
-            return;
-        }
-        
-        fetch('user_management.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `action=save_trial_days&trial_days=${trialDays}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    title: 'Sucesso!',
-                    text: data.message,
-                    icon: 'success',
-                    background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-                    color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
-                });
-            } else {
-                Swal.fire({
-                    title: 'Erro!',
-                    text: data.message,
-                    icon: 'error',
-                    background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-                    color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            Swal.fire({
-                title: 'Erro!',
-                text: 'Erro de comunicação com o servidor',
-                icon: 'error',
-                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
-            });
-        });
-    });
 
+    // Funções auxiliares para as ações
     function changeUserStatus(userId, status) {
         fetch('user_management.php', {
             method: 'POST',
@@ -2114,7 +1613,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Função para alternar a visibilidade da senha
     window.togglePasswordVisibility = function(inputId) {
         const input = document.getElementById(inputId);
-        const icon = document.querySelector(`.toggle-password i`);
+        const button = input.nextElementSibling;
+        const icon = button.querySelector('i');
         
         if (input.type === 'password') {
             input.type = 'text';
@@ -2127,250 +1627,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
-    /* Estilos responsivos para tabelas e conteúdo */
-    .table-responsive {
-        width: 100%;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        margin-bottom: 1rem;
-        display: block;
-    }
-    
-    /* Ajustes para dispositivos móveis */
-    @media (max-width: 768px) {
-        .card-body {
-            padding: 1rem;
-        }
-        
-        .page-header {
-            padding: 1rem 0;
-        }
-        
-        .btn {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-        }
-        
-        .form-input, .form-select {
-            font-size: 16px; /* Evita zoom em iOS */
-        }
-        
-        .grid {
-            grid-template-columns: 1fr !important;
-        }
-        
-        .flex-wrap {
-            flex-wrap: wrap;
-        }
-        
-        .w-full-mobile {
-            width: 100% !important;
-        }
-        
-        .mb-mobile-2 {
-            margin-bottom: 0.5rem;
-        }
-        
-        /* Ajustes para tabelas em mobile */
-        .mobile-scroll-container {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        /* Ajuste para o modal em telas pequenas */
-        .swal2-popup {
-            width: 95% !important;
-            max-width: 500px !important;
-        }
-    }
-    
-    /* Estilos para o modal de criação de usuário de teste */
-    .custom-modal {
-        border-radius: 16px;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        overflow: hidden;
-    }
-
-    .trial-user-form {
-        padding: 1rem 0;
-    }
-
-    .trial-form-group {
-        margin-bottom: 1.25rem;
-        text-align: left;
-    }
-
-    .trial-form-group label {
-        display: block;
-        font-size: 0.875rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: var(--text-primary);
-    }
-
-    .trial-form-group label i {
-        margin-right: 0.5rem;
-        color: var(--primary-500);
-    }
-
-    .trial-form-group input {
-        width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid var(--border-color);
-        border-radius: 8px;
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-        font-size: 0.875rem;
-        transition: all 0.3s ease;
-    }
-
-    .trial-form-group input:focus {
-        border-color: var(--primary-500);
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-        outline: none;
-    }
-
-    .password-input-wrapper {
-        position: relative;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 1rem;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        cursor: pointer;
-    }
-
-    .toggle-password:hover {
-        color: var(--primary-500);
-    }
-
-    .trial-info {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem;
-        background: var(--bg-tertiary);
-        border-radius: 8px;
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        margin-top: 0.5rem;
-    }
-
-    .trial-info i {
-        color: var(--primary-500);
-    }
-
-    .custom-confirm-button {
-        background: var(--primary-500) !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        padding: 0.75rem 1.5rem !important;
-        transition: all 0.3s ease !important;
-    }
-
-    .custom-confirm-button:hover {
-        background: var(--primary-600) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    .custom-cancel-button {
-        background: var(--bg-tertiary) !important;
-        color: var(--text-primary) !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        padding: 0.75rem 1.5rem !important;
-        transition: all 0.3s ease !important;
-    }
-
-    .custom-cancel-button:hover {
-        background: var(--bg-secondary) !important;
-    }
-
-    /* Estilos para o modal de credenciais */
-    .credentials-container {
-        padding: 0;
-    }
-
-    .credentials-header {
-        text-align: center;
-        margin-bottom: 1.5rem;
-    }
-
-    .credentials-header i {
-        font-size: 3rem;
-        color: var(--success-500);
-        margin-bottom: 1rem;
-    }
-
-    .credentials-header h3 {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    .credentials-body {
-        background: var(--bg-secondary);
-        border-radius: 12px;
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .credential-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .credential-item:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border-bottom: none;
-    }
-
-    .credential-label {
-        font-weight: 600;
-        color: var(--text-primary);
-    }
-
-    .credential-value-container {
-        display: flex;
-        align-items: center;
-    }
-
-    .credential-value-container code {
-        padding: 0.5rem 0.75rem;
-        background: var(--bg-tertiary);
-        border-radius: 6px;
-        font-family: monospace;
-        color: var(--primary-500);
-        font-weight: 600;
-    }
-
-    .credentials-footer {
-        text-align: center;
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-    }
-
-    /* Dark theme adjustments */
-    [data-theme="dark"] .trial-info {
-        background: rgba(51, 65, 85, 0.5);
-    }
-
-    [data-theme="dark"] .credential-value-container code {
-        background: rgba(51, 65, 85, 0.8);
-        color: var(--primary-400);
-    }
-</style>
 
 <?php include "includes/footer.php"; ?>
