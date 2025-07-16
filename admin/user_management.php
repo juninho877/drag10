@@ -1316,6 +1316,35 @@ html, body {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Ajustar layout para dispositivos móveis
+    function adjustForMobile() {
+        const isMobile = window.innerWidth <= 768;
+        
+        // Adicionar classes para elementos que precisam de ajustes em mobile
+        document.querySelectorAll('.action-buttons').forEach(el => {
+            el.classList.toggle('flex-wrap', isMobile);
+        });
+        
+        document.querySelectorAll('.btn-action').forEach(el => {
+            el.classList.toggle('w-full-mobile', isMobile);
+            el.classList.toggle('mb-mobile-2', isMobile);
+        });
+        
+        // Garantir que tabelas tenham scroll horizontal
+        document.querySelectorAll('.table-responsive').forEach(el => {
+            if (!el.parentElement.classList.contains('mobile-scroll-container') && isMobile) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'mobile-scroll-container';
+                el.parentNode.insertBefore(wrapper, el);
+                wrapper.appendChild(el);
+            }
+        });
+    }
+    
+    // Executar ajustes iniciais e em cada redimensionamento
+    adjustForMobile();
+    window.addEventListener('resize', adjustForMobile);
+    
     // Criar usuário de teste
     document.getElementById('createTrialUserBtn').addEventListener('click', function() {
         Swal.fire({
@@ -1355,6 +1384,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showCancelButton: true,
             confirmButtonText: 'Criar',
             cancelButtonText: 'Cancelar',
+            width: window.innerWidth <= 768 ? '95%' : '500px',
             customClass: {
                 popup: 'custom-modal',
                 confirmButton: 'custom-confirm-button',
@@ -2098,6 +2128,64 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
+    /* Estilos responsivos para tabelas e conteúdo */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 1rem;
+        display: block;
+    }
+    
+    /* Ajustes para dispositivos móveis */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .page-header {
+            padding: 1rem 0;
+        }
+        
+        .btn {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-input, .form-select {
+            font-size: 16px; /* Evita zoom em iOS */
+        }
+        
+        .grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+        
+        .w-full-mobile {
+            width: 100% !important;
+        }
+        
+        .mb-mobile-2 {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Ajustes para tabelas em mobile */
+        .mobile-scroll-container {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Ajuste para o modal em telas pequenas */
+        .swal2-popup {
+            width: 95% !important;
+            max-width: 500px !important;
+        }
+    }
+    
     /* Estilos para o modal de criação de usuário de teste */
     .custom-modal {
         border-radius: 16px;
