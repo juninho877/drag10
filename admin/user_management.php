@@ -320,10 +320,42 @@ include "includes/header.php";
             Atualizar
         </button>
     </div>
-    <a href="add_user.php" class="btn btn-primary">
-        <i class="fas fa-plus"></i>
-        Adicionar Usuário
-    </a>
+    <div class="flex gap-3">
+        <a href="add_user.php" class="btn btn-primary">
+            <i class="fas fa-plus"></i>
+            Adicionar Usuário
+        </a>
+        <button id="createTrialUserBtn" class="btn btn-success">
+            <i class="fas fa-user-clock"></i>
+            Criar Teste
+        </button>
+    </div>
+</div>
+
+<!-- Configuração de Período de Teste -->
+<div class="card mt-6">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-clock text-primary-500 mr-2"></i>
+            Configuração de Período de Teste
+        </h3>
+        <p class="card-subtitle">Defina o número de dias para o período de teste de novos usuários</p>
+    </div>
+    <div class="card-body">
+        <form id="trialDaysForm" class="flex items-end gap-4">
+            <div class="form-group flex-1 mb-0">
+                <label for="trial_days" class="form-label">Dias de Teste</label>
+                <input type="number" id="trial_days" name="trial_days" class="form-input" 
+                       value="<?php echo intval($adminSettings->getSetting('trial_days', 2)); ?>" 
+                       min="1" max="30" required>
+                <p class="text-xs text-muted mt-1">Entre 1 e 30 dias</p>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i>
+                Salvar Configuração
+            </button>
+        </form>
+    </div>
 </div>
 
 <div class="card">
@@ -396,7 +428,17 @@ include "includes/header.php";
                                         <span class="status-badge status-expired">Expirado</span>
                                     <?php else: ?>
                                         <span class="status-badge status-<?php echo $userData['status']; ?>">
-                                            <?php echo $userData['status'] === 'active' ? 'Ativo' : 'Inativo'; ?>
+                                            <?php 
+                                            if ($userData['status'] === 'active') {
+                                                echo 'Ativo';
+                                            } elseif ($userData['status'] === 'inactive') {
+                                                echo 'Inativo';
+                                            } elseif ($userData['status'] === 'trial') {
+                                                echo 'Teste';
+                                            } else {
+                                                echo ucfirst($userData['status']);
+                                            }
+                                            ?>
                                         </span>
                                     <?php endif; ?>
                                 </td>
@@ -1146,7 +1188,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             Swal.fire({
                 title: 'Confirmar Ação',
-                // JAVASCRIPT BUG FIX: Corrected text message
                 text: `Tem certeza que deseja ${statusText} este usuário?`,
                 icon: 'question',
                 showCancelButton: true,
@@ -1471,6 +1512,175 @@ document.addEventListener('DOMContentLoaded', function() {
                             color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
                         }).then(() => {
                             location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro!',
+                            text: data.message,
+                            icon: 'error',
+                            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: 'Erro de comunicação com o servidor',
+                        icon: 'error',
+                        background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                        color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                    });
+                });
+            }
+        });
+    });
+    
+    // Configuração de dias de teste
+    document.getElementById('trialDaysForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const trialDays = document.getElementById('trial_days').value;
+        
+        if (trialDays < 1 || trialDays > 30) {
+            Swal.fire({
+                title: 'Erro!',
+                text: 'O número de dias deve estar entre 1 e 30',
+                icon: 'error',
+                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+            });
+            return;
+        }
+        
+        fetch('user_management.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=save_trial_days&trial_days=${trialDays}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: data.message,
+                    icon: 'success',
+                    background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                    color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: data.message,
+                    icon: 'error',
+                    background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                    color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Erro!',
+                text: 'Erro de comunicação com o servidor',
+                icon: 'error',
+                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+            });
+        });
+    });
+    
+    // Criar usuário de teste
+    document.getElementById('createTrialUserBtn').addEventListener('click', function() {
+        Swal.fire({
+            title: 'Criar Usuário de Teste',
+            html: `
+                <div class="form-group">
+                    <label for="trial_username" class="form-label">Nome de Usuário</label>
+                    <input type="text" id="trial_username" class="swal2-input" placeholder="Digite o nome de usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="trial_password" class="form-label">Senha</label>
+                    <input type="password" id="trial_password" class="swal2-input" placeholder="Digite a senha" required>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Criar',
+            cancelButtonText: 'Cancelar',
+            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
+            preConfirm: () => {
+                const username = document.getElementById('trial_username').value;
+                const password = document.getElementById('trial_password').value;
+                
+                if (!username || !password) {
+                    Swal.showValidationMessage('Preencha todos os campos');
+                    return false;
+                }
+                
+                if (password.length < 6) {
+                    Swal.showValidationMessage('A senha deve ter pelo menos 6 caracteres');
+                    return false;
+                }
+                
+                return { username, password };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { username, password } = result.value;
+                
+                fetch('user_management.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=create_trial_user&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Usuário Criado!',
+                            html: `
+                                <p>Usuário de teste criado com sucesso!</p>
+                                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-sm font-medium mb-2">Credenciais:</p>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-muted">Usuário:</span>
+                                        <code class="bg-gray-100 px-2 py-1 rounded">${username}</code>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-muted">Senha:</span>
+                                        <code class="bg-gray-100 px-2 py-1 rounded">${password}</code>
+                                    </div>
+                                </div>
+                                <p class="mt-4 text-sm">Copie estas informações para compartilhar com o usuário.</p>
+                            `,
+                            icon: 'success',
+                            confirmButtonText: 'Copiar Credenciais',
+                            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const credentials = `Usuário: ${username}\nSenha: ${password}`;
+                                navigator.clipboard.writeText(credentials).then(() => {
+                                    Swal.fire({
+                                        title: 'Copiado!',
+                                        text: 'Credenciais copiadas para a área de transferência',
+                                        icon: 'success',
+                                        timer: 2000,
+                                        showConfirmButton: false,
+                                        background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                                        color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                });
+                            } else {
+                                location.reload();
+                            }
                         });
                     } else {
                         Swal.fire({

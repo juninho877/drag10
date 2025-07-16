@@ -158,6 +158,10 @@ include "includes/header.php";
             <i class="fas fa-plus"></i>
             Adicionar Usuário
         </a>
+        <button id="createTrialUserBtn" class="btn btn-success">
+            <i class="fas fa-user-clock"></i>
+            Criar Teste
+        </button>
     </div>
 </div>
 
@@ -636,6 +640,120 @@ document.addEventListener('DOMContentLoaded', function() {
     // Refresh Button
     document.getElementById('refreshBtn').addEventListener('click', function() {
         location.reload();
+    });
+    
+    // Criar usuário de teste
+    document.getElementById('createTrialUserBtn').addEventListener('click', function() {
+        Swal.fire({
+            title: 'Criar Usuário de Teste',
+            html: `
+                <div class="form-group">
+                    <label for="trial_username" class="form-label">Nome de Usuário</label>
+                    <input type="text" id="trial_username" class="swal2-input" placeholder="Digite o nome de usuário" required>
+                </div>
+                <div class="form-group">
+                    <label for="trial_password" class="form-label">Senha</label>
+                    <input type="password" id="trial_password" class="swal2-input" placeholder="Digite a senha" required>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Criar',
+            cancelButtonText: 'Cancelar',
+            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
+            preConfirm: () => {
+                const username = document.getElementById('trial_username').value;
+                const password = document.getElementById('trial_password').value;
+                
+                if (!username || !password) {
+                    Swal.showValidationMessage('Preencha todos os campos');
+                    return false;
+                }
+                
+                if (password.length < 6) {
+                    Swal.showValidationMessage('A senha deve ter pelo menos 6 caracteres');
+                    return false;
+                }
+                
+                return { username, password };
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const { username, password } = result.value;
+                
+                fetch('master_users.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=create_trial_user&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Usuário Criado!',
+                            html: `
+                                <p>Usuário de teste criado com sucesso!</p>
+                                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                                    <p class="text-sm font-medium mb-2">Credenciais:</p>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <span class="text-muted">Usuário:</span>
+                                        <code class="bg-gray-100 px-2 py-1 rounded">${username}</code>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-muted">Senha:</span>
+                                        <code class="bg-gray-100 px-2 py-1 rounded">${password}</code>
+                                    </div>
+                                </div>
+                                <p class="mt-4 text-sm">Copie estas informações para compartilhar com o usuário.</p>
+                            `,
+                            icon: 'success',
+                            confirmButtonText: 'Copiar Credenciais',
+                            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                const credentials = `Usuário: ${username}\nSenha: ${password}`;
+                                navigator.clipboard.writeText(credentials).then(() => {
+                                    Swal.fire({
+                                        title: 'Copiado!',
+                                        text: 'Credenciais copiadas para a área de transferência',
+                                        icon: 'success',
+                                        timer: 2000,
+                                        showConfirmButton: false,
+                                        background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                                        color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                                    }).then(() => {
+                                        location.reload();
+                                    });
+                                });
+                            } else {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Erro!',
+                            text: data.message,
+                            icon: 'error',
+                            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        title: 'Erro!',
+                        text: 'Erro de comunicação com o servidor',
+                        icon: 'error',
+                        background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                        color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                    });
+                });
+            }
+        });
     });
 
     function changeUserStatus(userId, status) {
