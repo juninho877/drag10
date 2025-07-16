@@ -81,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             'email' => $newEmail,
             'password' => $newPassword,
             'role' => 'user',
-            'status' => 'active',
+            'status' => 'trial',
             'expires_at' => date('Y-m-d', strtotime('+2 days'))
         ];
 
@@ -90,6 +90,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             $potentialMasterId = intval($_POST['master_ref_id']);
             // Verificar se o ID existe e se o usuário tem a função 'master'
             $masterUser = $user->getUserById($potentialMasterId);
+            // Associar ao master, mas NÃO consumir créditos durante o período de teste
             if ($masterUser && $masterUser['role'] === 'master') {
                 $userData['parent_user_id'] = $potentialMasterId;
             }
@@ -100,8 +101,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
             
             // Enviar notificação via Telegram para o administrador e redirecionar
+            $masterInfo = "";
+            if (isset($userData['parent_user_id']) && $userData['parent_user_id'] > 0) {
+                $masterUser = $user->getUserById($userData['parent_user_id']);
+                if ($masterUser) {
+                    $masterInfo = "\n👤 *Master:* " . $masterUser['username'] . " (ID: " . $userData['parent_user_id'] . ")";
+                }
+            }
+            
             try {
-                TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail);
+                TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail, $masterInfo);
             } catch (Exception $e) {
                 // Silenciosamente ignorar erros de notificação
                 error_log("Erro ao enviar notificação: " . $e->getMessage());

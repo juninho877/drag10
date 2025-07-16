@@ -104,6 +104,9 @@ class User {
     // Criar novo usuário
     public function createUser($data) {
         try {
+            // Verificar se o status é "trial" (período de teste)
+            $isTrial = isset($data['status']) && $data['status'] === 'trial';
+            
             // Buscar limites de troca de imagens do admin (ID 1)
             $stmt = $this->db->prepare("
                 SELECT logo_change_limit, movie_logo_change_limit, background_change_limit
@@ -133,9 +136,10 @@ class User {
                 }
             }
             
-            // Se for um usuário criado por um master, verificar se o master tem créditos suficientes
+            // Se for um usuário criado por um master e NÃO estiver em período de teste,
+            // verificar se o master tem créditos suficientes
             $parentUserId = $data['parent_user_id'] ?? null;
-            if ($parentUserId && $data['role'] === 'user') {
+            if ($parentUserId && $data['role'] === 'user' && !$isTrial) {
                 // Verificar se o parent_user_id existe e é um master
                 $stmt = $this->db->prepare("SELECT id, role, credits FROM usuarios WHERE id = ? AND role = 'master'");
                 $stmt->execute([$parentUserId]);
@@ -144,25 +148,27 @@ class User {
                 if (!$masterUser) {
                     return ['success' => false, 'message' => 'Usuário master não encontrado ou não tem permissão'];
                 }
-                
+
                 // Verificar se o master tem créditos suficientes
                 if ($masterUser['credits'] < 1) {
                     return ['success' => false, 'message' => 'O usuário master não tem créditos suficientes'];
                 }
                 
-                // Deduzir um crédito do master
-                $this->deductCredits($parentUserId, 1);
-                
-                // Registrar a transação
-                $creditTransaction = new CreditTransaction();
-                $creditTransaction->recordTransaction(
-                    $parentUserId,
-                    'user_creation',
-                    -1,
-                    "Criação do usuário {$data['username']}",
-                    null,
-                    null
-                );
+                // Deduzir um crédito do master apenas se NÃO for período de teste
+                if (!$isTrial) {
+                    $this->deductCredits($parentUserId, 1);
+                    
+                    // Registrar a transação
+                    $creditTransaction = new CreditTransaction();
+                    $creditTransaction->recordTransaction(
+                        $parentUserId,
+                        'user_creation',
+                        -1,
+                        "Criação do usuário {$data['username']}",
+                        null,
+                        null
+                    );
+                }
             }
             
             $stmt = $this->db->prepare("
