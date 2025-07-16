@@ -346,8 +346,7 @@ include "includes/header.php";
                                         if ($user['status'] === 'active') {
                                             echo 'Ativo';
                                         } elseif ($user['status'] === 'trial') {
-                                            echo 'Teste';
-                                        } else {
+                                    <?php endif; ?>
                                             echo 'Inativo';
                                         }
                                         ?>
@@ -430,6 +429,8 @@ include "includes/header.php";
                                         </button>
                                         
                                         <?php if ($userData['status'] === 'active'): ?>
+                            </tr>
+                        <?php endforeach; ?>
                                             <button class="btn-action btn-warning toggle-status" data-user-id="<?php echo $userData['id']; ?>" data-status="inactive" title="Desativar">
                                                 <i class="fas fa-user-times"></i>
                                             </button>
