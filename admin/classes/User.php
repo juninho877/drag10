@@ -14,7 +14,7 @@ class User {
         $stmt = $this->db->prepare("
             SELECT id, username, password, role, status, expires_at 
             FROM usuarios 
-            WHERE username = ? AND status = 'active'
+            WHERE username = ? AND (status = 'active' OR status = 'trial')
         ");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
@@ -338,6 +338,7 @@ class User {
                 COUNT(*) as total,
                 SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
                 SUM(CASE WHEN status = 'inactive' THEN 1 ELSE 0 END) as inactive,
+                SUM(CASE WHEN status = 'trial' THEN 1 ELSE 0 END) as trial,
                 SUM(CASE WHEN role = 'admin' THEN 1 ELSE 0 END) as admins,
                 SUM(CASE WHEN role = 'master' THEN 1 ELSE 0 END) as masters,
                 SUM(CASE WHEN expires_at IS NOT NULL AND expires_at < CURDATE() THEN 1 ELSE 0 END) as expired

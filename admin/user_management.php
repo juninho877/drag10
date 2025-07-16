@@ -343,6 +343,12 @@ include "includes/header.php";
                                                 break;
                                             default:
                                                 echo 'Usuário';
+                                        if ($user['status'] === 'active') {
+                                            echo 'Ativo';
+                                        } elseif ($user['status'] === 'trial') {
+                                            echo 'Teste';
+                                        } else {
+                                            echo 'Inativo';
                                         }
                                         ?>
                                     </span>
