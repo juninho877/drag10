@@ -202,7 +202,7 @@ include "includes/header.php";
             <i class="fas fa-plus"></i>
             Adicionar Usuário
         </a>
-        <button id="createTrialUserBtn" class="btn btn-warning" <?php echo $masterCredits < 1 ? 'disabled' : ''; ?>>
+        <button id="createTrialUserBtn" class="btn btn-warning">
             <i class="fas fa-user-clock"></i>
             Criar Teste
         </button>
@@ -874,6 +874,34 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Criar usuário de teste
     document.getElementById('createTrialUserBtn').addEventListener('click', function() {
+        // Verificar se o master tem créditos suficientes
+        const masterCredits = <?php echo $masterCredits; ?>;
+        if (masterCredits < 1) {
+            Swal.fire({
+                title: 'Créditos Insuficientes',
+                html: `
+                    <div class="p-3">
+                        <p class="mb-4">Você precisa de pelo menos 1 crédito para criar um usuário de teste.</p>
+                        <p class="text-sm text-muted mb-4">Seus créditos atuais: <strong>0</strong></p>
+                        <a href="buy_credits.php" class="btn btn-success w-full">
+                            <i class="fas fa-shopping-cart"></i>
+                            Comprar Créditos
+                        </a>
+                    </div>
+                `,
+                showConfirmButton: false,
+                showCancelButton: true,
+                cancelButtonText: 'Fechar',
+                customClass: {
+                    popup: 'custom-modal',
+                    cancelButton: 'custom-cancel-button'
+                },
+                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+            });
+            return;
+        }
+        
         Swal.fire({
             title: 'Criar Usuário de Teste',
             html: `<div class="trial-user-form">
