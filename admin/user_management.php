@@ -1467,7 +1467,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
                 color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
                 inputValidator: (value) => {
-                    if (!value || value = 0) {
+                    if (!value || value == 0) {
                         return 'Você precisa adicionar ou remover pelo menos 1 crédito!';
                     }
                 }
