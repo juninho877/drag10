@@ -1097,6 +1097,21 @@ if ($isTempUser) {
         font-size: 0.875rem;
     }
     
+    .status-inactive {
+        background: var(--danger-50);
+        color: var(--danger-600);
+    }
+    
+    .status-trial {
+        background: var(--warning-50);
+        color: var(--warning-600);
+    }
+    
+    .status-expired {
+        background: var(--warning-50);
+        color: var(--warning-600);
+    }
+    
     [data-theme="dark"] .expired-badge {
         background: rgba(239, 68, 68, 0.1);
         color: var(--danger-400);
@@ -1120,5 +1135,20 @@ if ($isTempUser) {
         background: rgba(239, 68, 68, 0.1);
         color: var(--danger-400);
         border-color: rgba(239, 68, 68, 0.2);
+    }
+    
+    [data-theme="dark"] .status-inactive {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger-400);
+    }
+    
+    [data-theme="dark"] .status-trial {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-400);
+    }
+    
+    [data-theme="dark"] .status-expired {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning-400);
     }
 </style>
