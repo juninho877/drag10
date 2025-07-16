@@ -285,7 +285,7 @@ include "includes/header.php";
                     <i class="fas fa-times"></i>
                     Limpar Filtros
                 </a>
-            </div>
+                <button id="createTrialUserBtn" class="btn btn-warning" <?php echo $_SESSION["role"] !== 'admin' ? 'disabled' : ''; ?>>
         </form>
     </div>
 </div>
@@ -1896,7 +1896,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.success) {
                         Swal.fire({
                             title: 'Usuário Criado!',
-                            html: `<div class="credentials-container">
+                            html: `
+                            <div class="credentials-container">
                                     <div class="credentials-header">
                                         <i class="fas fa-check-circle"></i>
                                         <h3>Usuário de teste criado com sucesso!</h3>
@@ -1928,7 +1929,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         </div>
                                     </div>
                                     <div class="credentials-footer">
-                                        <p>Copie estas informações para compartilhar com o usuário.</p>
+                                        <p>Copie estas informações para compartilhar com o usuário</p>
                                     </div>
                                 </div>`,
                             icon: 'success',
