@@ -359,7 +359,6 @@ include "includes/header.php";
                                         <span class="status-badge status-<?php echo $userData['status']; ?>">
                                             <?php echo $userData['status'] === 'active' ? 'Ativo' : 'Inativo'; ?>
                                         </span>
-                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php 
@@ -428,6 +427,8 @@ include "includes/header.php";
                                         </button>
                                         
                                         <?php if ($userData['status'] === 'active'): ?>
+                            </tr>
+                        <?php endforeach; ?>
                             </tr>
                         <?php endforeach; ?>
                                             <button class="btn-action btn-warning toggle-status" data-user-id="<?php echo $userData['id']; ?>" data-status="inactive" title="Desativar">
