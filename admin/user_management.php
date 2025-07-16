@@ -88,6 +88,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $result = $user->resetAllImageChangeCounts();
             echo json_encode($result);
             exit;
+            
+        case 'create_trial_user':
+            header('Content-Type: application/json');
+            
+            // Inicializar AdminSettings para obter o número de dias de teste
+            $adminSettings = new AdminSettings();
+            $trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
+            
+            $username = trim($_POST['username']);
+            $password = trim($_POST['password']);
+            
+            if (empty($username) || empty($password)) {
+                echo json_encode(['success' => false, 'message' => 'Nome de usuário e senha são obrigatórios']);
+                exit;
+            }
+            
+            if (strlen($password) < 6) {
+                echo json_encode(['success' => false, 'message' => 'A senha deve ter pelo menos 6 caracteres']);
+                exit;
+            }
+            
+            $data = [
+                'username' => $username,
+                'email' => $username . '@example.com', // Email temporário
+                'password' => $password,
+                'role' => 'user',
+                'status' => 'trial',
+                'expires_at' => date('Y-m-d', strtotime("+{$trialDays} days"))
+            ];
+            
+            $result = $user->createUser($data);
+            echo json_encode($result);
+            exit;
     }
 }
 
