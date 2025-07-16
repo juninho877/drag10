@@ -874,33 +874,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Criar usuário de teste
     document.getElementById('createTrialUserBtn').addEventListener('click', function() {
-        <?php if ($masterCredits < 1): ?>
-        Swal.fire({
-            title: 'Créditos Insuficientes',
-            html: `
-                <div class="alert alert-warning" style="text-align: left; margin-bottom: 1rem;">
-                    <i class="fas fa-exclamation-triangle" style="margin-right: 0.5rem;"></i>
-                    <div>
-                        <p style="font-weight: 500; margin-bottom: 0.25rem;">Você precisa de pelo menos 1 crédito</p>
-                        <p style="font-size: 0.875rem;">Para criar usuários de teste, você precisa ter pelo menos 1 crédito disponível na sua conta.</p>
-                    </div>
-                </div>
-                <p style="margin-top: 1rem;">Compre créditos para poder criar usuários de teste.</p>
-            `,
-            icon: 'warning',
-            confirmButtonText: 'Comprar Créditos',
-            showCancelButton: true,
-            cancelButtonText: 'Fechar',
-            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.href = 'buy_credits.php';
-            }
-        });
-        return;
-        <?php endif; ?>
-        
         Swal.fire({
             title: 'Criar Usuário de Teste',
             html: `<div class="trial-user-form">
