@@ -285,7 +285,7 @@ include "includes/header.php";
                     <i class="fas fa-times"></i>
                     Limpar Filtros
                 </a>
-                <button id="createTrialUserBtn" class="btn btn-warning" <?php echo $_SESSION["role"] !== 'admin' ? 'disabled' : ''; ?>>
+            </div>
         </form>
     </div>
 </div>
