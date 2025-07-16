@@ -106,7 +106,6 @@ include "includes/header.php";
     <p class="page-subtitle">Controle completo dos usuários do sistema</p>
 </div>
 
-<!-- Stats Cards -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6 stats-mobile">
     <div class="card">
         <div class="card-body">
@@ -165,7 +164,6 @@ include "includes/header.php";
     </div>
 </div>
 
-<!-- Filter Form -->
 <div class="card mb-6">
     <div class="card-header">
         <h3 class="card-title">Filtrar Usuários</h3>
@@ -215,7 +213,6 @@ include "includes/header.php";
     </div>
 </div>
 
-<!-- Image Change Limits -->
 <div class="card mb-6">
     <div class="card-header">
         <h3 class="card-title">
@@ -273,7 +270,6 @@ include "includes/header.php";
     </div>
 </div>
 
-<!-- Actions Bar -->
 <div class="flex justify-between items-center mb-6 actions-bar-mobile">
     <div class="flex gap-3">
         <button id="refreshBtn" class="btn btn-secondary">
@@ -287,7 +283,6 @@ include "includes/header.php";
     </a>
 </div>
 
-<!-- Users Table -->
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Lista de Usuários</h3>
@@ -321,7 +316,9 @@ include "includes/header.php";
                             $isExpired = $userData['expires_at'] && strtotime($userData['expires_at']) < time();
                         ?>
                             <tr data-user-id="<?php echo $userData['id']; ?>">
+                                
                                 <td><?php echo $userData['id']; ?></td>
+
                                 <td>
                                     <div class="user-info">
                                         <div class="user-avatar-small">
@@ -330,7 +327,9 @@ include "includes/header.php";
                                         <span class="font-medium"><?php echo htmlspecialchars($userData['username']); ?></span>
                                     </div>
                                 </td>
+
                                 <td><?php echo htmlspecialchars($userData['email'] ?? '-'); ?></td>
+
                                 <td>
                                     <span class="role-badge role-<?php echo $userData['role']; ?>">
                                         <?php 
@@ -343,30 +342,29 @@ include "includes/header.php";
                                                 break;
                                             default:
                                                 echo 'Usuário';
-                                        if ($user['status'] === 'active') {
-                                            echo 'Ativo';
-                                        } elseif ($user['status'] === 'trial') {
-                                            echo 'Inativo';
+                                                break;
                                         }
                                         ?>
                                     </span>
                                 </td>
-                            </tr>
-                        <?php endforeach; ?>
+
+                                <td>
                                     <?php if ($isExpired): ?>
                                         <span class="status-badge status-expired">Expirado</span>
                                     <?php else: ?>
                                         <span class="status-badge status-<?php echo $userData['status']; ?>">
                                             <?php echo $userData['status'] === 'active' ? 'Ativo' : 'Inativo'; ?>
                                         </span>
+                                    <?php endif; ?>
                                 </td>
+
                                 <td>
                                     <?php 
                                     if ($userData['expires_at']) {
                                         $expiresAt = new DateTime($userData['expires_at']);
                                         $now = new DateTime();
-                                        $isExpired = $expiresAt < $now;
-                                        echo '<span class="' . ($isExpired ? 'text-danger-500' : 'text-muted') . '">';
+                                        $isExpiredCheck = $expiresAt < $now;
+                                        echo '<span class="' . ($isExpiredCheck ? 'text-danger-500' : 'text-muted') . '">';
                                         echo $expiresAt->format('d/m/Y');
                                         echo '</span>';
                                     } else {
@@ -374,6 +372,7 @@ include "includes/header.php";
                                     }
                                     ?>
                                 </td>
+
                                 <td>
                                     <?php if ($userData['role'] === 'master'): ?>
                                         <div class="flex items-center gap-2">
@@ -389,6 +388,7 @@ include "includes/header.php";
                                         <span class="text-muted">-</span>
                                     <?php endif; ?>
                                 </td>
+
                                 <td>
                                     <?php if ($userData['role'] !== 'admin'): ?>
                                     <div class="limits-display">
@@ -406,6 +406,7 @@ include "includes/header.php";
                                     <span class="text-muted">Sem limite</span>
                                     <?php endif; ?>
                                 </td>
+
                                 <td>
                                     <?php 
                                     if ($userData['last_login']) {
@@ -416,6 +417,7 @@ include "includes/header.php";
                                     }
                                     ?>
                                 </td>
+
                                 <td>
                                     <div class="action-buttons">
                                         <a href="edit_user.php?id=<?php echo $userData['id']; ?>" class="btn-action btn-edit" title="Editar">
@@ -427,10 +429,6 @@ include "includes/header.php";
                                         </button>
                                         
                                         <?php if ($userData['status'] === 'active'): ?>
-                            </tr>
-                        <?php endforeach; ?>
-                            </tr>
-                        <?php endforeach; ?>
                                             <button class="btn-action btn-warning toggle-status" data-user-id="<?php echo $userData['id']; ?>" data-status="inactive" title="Desativar">
                                                 <i class="fas fa-user-times"></i>
                                             </button>
@@ -451,10 +449,9 @@ include "includes/header.php";
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </tbody>
-            </table>
+                </table>
         </div>
         
-        <!-- Mobile Cards Version -->
         <div class="mobile-users-grid">
             <?php if (empty($users)): ?>
                 <div class="mobile-user-card">
@@ -516,8 +513,8 @@ include "includes/header.php";
                                     if ($userData['expires_at']) {
                                         $expiresAt = new DateTime($userData['expires_at']);
                                         $now = new DateTime();
-                                        $isExpired = $expiresAt < $now;
-                                        echo '<span class="' . ($isExpired ? 'text-danger-500' : 'text-muted') . '">';
+                                        $isExpiredCheck = $expiresAt < $now;
+                                        echo '<span class="' . ($isExpiredCheck ? 'text-danger-500' : 'text-muted') . '">';
                                         echo $expiresAt->format('d/m/Y');
                                         echo '</span>';
                                     } else {
@@ -1106,7 +1103,8 @@ document.addEventListener('DOMContentLoaded', function() {
             
             Swal.fire({
                 title: 'Confirmar Ação',
-                text: creditAmount > 0 ? `Deseja adicionar ${Math.abs(creditAmount)} créditos para este usuário?` : `Deseja remover ${Math.abs(creditAmount)} créditos deste usuário?`,
+                // JAVASCRIPT BUG FIX: Corrected text message
+                text: `Tem certeza que deseja ${statusText} este usuário?`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Sim, ' + statusText,
@@ -1165,8 +1163,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
                 color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
                 inputValidator: (value) => {
-                    if (!value || value == 0) {
-                        return 'Você precisa adicionar ou remover pelo menos 1 crédito!';
+                    if (!value || value <= 0) {
+                        return 'Você precisa adicionar pelo menos 1 crédito!';
                     }
                 }
             }).then((result) => {
