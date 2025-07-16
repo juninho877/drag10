@@ -11,9 +11,10 @@ class TelegramNotifier {
      * @param string $username Nome de usuário do novo cadastro
      * @param string $email Email do novo cadastro
      * @param string $additionalInfo Informações adicionais (como o master associado)
+     * @param int $trialDays Número de dias do período de teste
      * @return bool Sucesso ou falha no envio
      */
-    public static function sendNewRegistrationNotification($username, $email, $additionalInfo = '') {
+    public static function sendNewRegistrationNotification($username, $email, $additionalInfo = '', $trialDays = 2) {
         try {
             require_once __DIR__ . '/TelegramSettings.php';
             
@@ -35,7 +36,7 @@ class TelegramNotifier {
             $message .= "👤 *Usuário:* " . $username . "\n";
             $message .= "📧 *Email:* " . $email . "\n";
             $message .= "🕒 *Data:* " . date('d/m/Y H:i:s') . "\n";
-            $message .= "🔰 *Status:* Conta em período de teste (2 dias)" . $additionalInfo . "\n\n";
+            $message .= "🔰 *Status:* Conta em período de teste (" . $trialDays . " dias)" . $additionalInfo . "\n\n";
             $message .= "Este usuário foi cadastrado através do formulário de registro.";
             
             // Enviar a mensagem via API do Telegram

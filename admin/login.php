@@ -115,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             }
             
             try {
-                TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail, $masterInfo);
+                TelegramNotifier::sendNewRegistrationNotification($newUsername, $newEmail, $masterInfo, $trialDays);
             } catch (Exception $e) {
                 // Silenciosamente ignorar erros de notificação
                 error_log("Erro ao enviar notificação: " . $e->getMessage());
@@ -710,7 +710,7 @@ if (isset($_SESSION['register_error'])) {
             <div class="login-form" id="registerFormContainer">
                 <div class="welcome-text">
                     <h3>Crie sua conta grátis!</h3>
-                    <p>Teste o sistema por 2 dias sem compromisso.</p>
+                    <p>Teste o sistema por <?php echo $trialDays; ?> dias sem compromisso.</p>
                 </div>
 
                 <form method="POST" action="login.php" id="registerForm">
