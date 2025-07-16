@@ -1,5 +1,6 @@
 <?php
 session_start();
+// Verificar permissões
 if (!isset($_SESSION["usuario"]) || $_SESSION["role"] !== 'master') {
     header("Location: login.php");
     exit();
@@ -84,6 +85,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 $pageTitle = "Gerenciamento de Usuários";
 include "includes/header.php";
 ?>
+
+<!-- Ajuste para viewport em dispositivos móveis -->
+<style>
+@viewport {
+    width: device-width;
+    zoom: 1.0;
+}
+
+@-ms-viewport {
+    width: device-width;
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .form-input {
+        font-size: 16px; /* Evita zoom automático em iOS */
+    }
+    
+    .modal-content {
+        width: 95%;
+        max-width: 95%;
+        margin: 0 auto;
+    }
+}
+</style>
 
 <div class="page-header">
     <h1 class="page-title">
