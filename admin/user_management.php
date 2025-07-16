@@ -97,10 +97,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
             
             $username = trim($_POST['username']);
+            $email = trim($_POST['email']);
             $password = trim($_POST['password']);
             
-            if (empty($username) || empty($password)) {
-                echo json_encode(['success' => false, 'message' => 'Nome de usuário e senha são obrigatórios']);
+            if (empty($username) || empty($password) || empty($email)) {
+                echo json_encode(['success' => false, 'message' => 'Nome de usuário, email e senha são obrigatórios']);
                 exit;
             }
             
@@ -111,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             
             $data = [
                 'username' => $username,
-                'email' => $username . '@example.com', // Email temporário
+                'email' => $email,
                 'password' => $password,
                 'role' => 'user',
                 'status' => 'trial',
@@ -358,7 +359,7 @@ include "includes/header.php";
             <i class="fas fa-plus"></i>
             Adicionar Usuário
         </a>
-        <button id="createTrialUserBtn" class="btn btn-success">
+        <button id="createTrialUserBtn" class="btn btn-warning">
             <i class="fas fa-user-clock"></i>
             Criar Teste
         </button>
@@ -1207,6 +1208,192 @@ include "includes/header.php";
             grid-template-columns: 1fr;
         }
     }
+
+    /* Estilos para o modal de criação de usuário de teste */
+    .custom-modal {
+        border-radius: 16px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        overflow: hidden;
+    }
+
+    .trial-user-form {
+        padding: 1rem 0;
+    }
+
+    .trial-form-group {
+        margin-bottom: 1.25rem;
+        text-align: left;
+    }
+
+    .trial-form-group label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+
+    .trial-form-group label i {
+        margin-right: 0.5rem;
+        color: var(--primary-500);
+    }
+
+    .trial-form-group input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+    }
+
+    .trial-form-group input:focus {
+        border-color: var(--primary-500);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        outline: none;
+    }
+
+    .password-input-wrapper {
+        position: relative;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .toggle-password:hover {
+        color: var(--primary-500);
+    }
+
+    .trial-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+    }
+
+    .trial-info i {
+        color: var(--primary-500);
+    }
+
+    .custom-confirm-button {
+        background: var(--primary-500) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 1.5rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .custom-confirm-button:hover {
+        background: var(--primary-600) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    .custom-cancel-button {
+        background: var(--bg-tertiary) !important;
+        color: var(--text-primary) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 1.5rem !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .custom-cancel-button:hover {
+        background: var(--bg-secondary) !important;
+    }
+
+    /* Estilos para o modal de credenciais */
+    .credentials-container {
+        padding: 0;
+    }
+
+    .credentials-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .credentials-header i {
+        font-size: 3rem;
+        color: var(--success-500);
+        margin-bottom: 1rem;
+    }
+
+    .credentials-header h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .credentials-body {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .credential-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .credential-item:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+
+    .credential-label {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .credential-value-container {
+        display: flex;
+        align-items: center;
+    }
+
+    .credential-value-container code {
+        padding: 0.5rem 0.75rem;
+        background: var(--bg-tertiary);
+        border-radius: 6px;
+        font-family: monospace;
+        color: var(--primary-500);
+        font-weight: 600;
+    }
+
+    .credentials-footer {
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    /* Dark theme adjustments */
+    [data-theme="dark"] .trial-info {
+        background: rgba(51, 65, 85, 0.5);
+    }
+
+    [data-theme="dark"] .credential-value-container code {
+        background: rgba(51, 65, 85, 0.8);
+        color: var(--primary-400);
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -1629,27 +1816,55 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('createTrialUserBtn').addEventListener('click', function() {
         Swal.fire({
             title: 'Criar Usuário de Teste',
-            html: `
-                <div class="form-group">
-                    <label for="trial_username" class="form-label">Nome de Usuário</label>
-                    <input type="text" id="trial_username" class="swal2-input" placeholder="Digite o nome de usuário" required>
-                </div>
-                <div class="form-group">
-                    <label for="trial_password" class="form-label">Senha</label>
-                    <input type="password" id="trial_password" class="swal2-input" placeholder="Digite a senha" required>
-                </div>
-            `,
+            html: `<div class="trial-user-form">
+                    <div class="trial-form-group">
+                        <label for="trial_username">
+                            <i class="fas fa-user"></i>
+                            Nome de Usuário
+                        </label>
+                        <input type="text" id="trial_username" placeholder="Digite o nome de usuário" required>
+                    </div>
+                    <div class="trial-form-group">
+                        <label for="trial_email">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </label>
+                        <input type="email" id="trial_email" placeholder="Digite o email" required>
+                    </div>
+                    <div class="trial-form-group">
+                        <label for="trial_password">
+                            <i class="fas fa-lock"></i>
+                            Senha
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="trial_password" placeholder="Mínimo de 6 caracteres" required>
+                            <button type="button" class="toggle-password" onclick="togglePasswordVisibility('trial_password')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="trial-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>O usuário terá acesso por <strong>${trialDays}</strong> dias de teste</span>
+                    </div>
+                </div>`,
             showCancelButton: true,
             confirmButtonText: 'Criar',
             cancelButtonText: 'Cancelar',
+            customClass: {
+                popup: 'custom-modal',
+                confirmButton: 'custom-confirm-button',
+                cancelButton: 'custom-cancel-button'
+            },
             background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
             color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
             preConfirm: () => {
                 const username = document.getElementById('trial_username').value;
+                const email = document.getElementById('trial_email').value;
                 const password = document.getElementById('trial_password').value;
                 
-                if (!username || !password) {
-                    Swal.showValidationMessage('Preencha todos os campos');
+                if (!username || !password || !email) {
+                    Swal.showValidationMessage('Preencha todos os campos obrigatórios');
                     return false;
                 }
                 
@@ -1657,47 +1872,76 @@ document.addEventListener('DOMContentLoaded', function() {
                     Swal.showValidationMessage('A senha deve ter pelo menos 6 caracteres');
                     return false;
                 }
+
+                if (!email.includes('@')) {
+                    Swal.showValidationMessage('Digite um email válido');
+                    return false;
+                }
                 
-                return { username, password };
+                return { username, email, password };
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                const { username, password } = result.value;
+                const { username, email, password } = result.value;
                 
                 fetch('user_management.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
                     },
-                    body: `action=create_trial_user&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+                    body: `action=create_trial_user&username=${encodeURIComponent(username)}&email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         Swal.fire({
                             title: 'Usuário Criado!',
-                            html: `
-                                <p>Usuário de teste criado com sucesso!</p>
-                                <div class="mt-4 p-3 bg-gray-50 rounded-lg">
-                                    <p class="text-sm font-medium mb-2">Credenciais:</p>
-                                    <div class="flex justify-between items-center mb-2">
-                                        <span class="text-muted">Usuário:</span>
-                                        <code class="bg-gray-100 px-2 py-1 rounded">${username}</code>
+                            html: `<div class="credentials-container">
+                                    <div class="credentials-header">
+                                        <i class="fas fa-check-circle"></i>
+                                        <h3>Usuário de teste criado com sucesso!</h3>
                                     </div>
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-muted">Senha:</span>
-                                        <code class="bg-gray-100 px-2 py-1 rounded">${password}</code>
+                                    <div class="credentials-body">
+                                        <div class="credential-item">
+                                            <span class="credential-label">Usuário:</span>
+                                            <div class="credential-value-container">
+                                                <code>${username}</code>
+                                            </div>
+                                        </div>
+                                        <div class="credential-item">
+                                            <span class="credential-label">Email:</span>
+                                            <div class="credential-value-container">
+                                                <code>${email}</code>
+                                            </div>
+                                        </div>
+                                        <div class="credential-item">
+                                            <span class="credential-label">Senha:</span>
+                                            <div class="credential-value-container">
+                                                <code>${password}</code>
+                                            </div>
+                                        </div>
+                                        <div class="credential-item">
+                                            <span class="credential-label">Validade:</span>
+                                            <div class="credential-value-container">
+                                                <code>${trialDays} dias</code>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <p class="mt-4 text-sm">Copie estas informações para compartilhar com o usuário.</p>
-                            `,
+                                    <div class="credentials-footer">
+                                        <p>Copie estas informações para compartilhar com o usuário.</p>
+                                    </div>
+                                </div>`,
                             icon: 'success',
                             confirmButtonText: 'Copiar Credenciais',
+                            customClass: {
+                                popup: 'custom-modal',
+                                confirmButton: 'custom-confirm-button'
+                            },
                             background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
                             color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                const credentials = `Usuário: ${username}\nSenha: ${password}`;
+                                const credentials = `Usuário: ${username}\nEmail: ${email}\nSenha: ${password}\nValidade: ${trialDays} dias`;
                                 navigator.clipboard.writeText(credentials).then(() => {
                                     Swal.fire({
                                         title: 'Copiado!',
@@ -1920,6 +2164,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Função para alternar a visibilidade da senha
+function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = document.querySelector(`#${inputId} + .toggle-password i`);
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
 </script>
 
 <?php include "includes/footer.php"; ?>
