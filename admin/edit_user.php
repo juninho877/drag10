@@ -184,6 +184,7 @@ include "includes/header.php";
                             <select id="status" name="status" class="form-input form-select" required>
                                 <option value="active" <?php echo ($_POST['status'] ?? $userData['status']) === 'active' ? 'selected' : ''; ?>>Ativo</option>
                                 <option value="inactive" <?php echo ($_POST['status'] ?? $userData['status']) === 'inactive' ? 'selected' : ''; ?>>Inativo</option>
+                                <option value="trial" <?php echo ($_POST['status'] ?? $userData['status']) === 'trial' ? 'selected' : ''; ?>>Período de Teste</option>
                             </select>
                         </div>
 
@@ -314,7 +315,15 @@ include "includes/header.php";
                     <div class="flex justify-between">
                         <span class="text-muted">Status:</span>
                         <span class="status-badge status-<?php echo $userData['status']; ?>">
-                            <?php echo $userData['status'] === 'active' ? 'Ativo' : 'Inativo'; ?>
+                            <?php 
+                            if ($userData['status'] === 'active') {
+                                echo 'Ativo';
+                            } elseif ($userData['status'] === 'trial') {
+                                echo 'Teste';
+                            } else {
+                                echo 'Inativo';
+                            }
+                            ?>
                         </span>
                     </div>
                     <div class="flex justify-between">
