@@ -353,7 +353,8 @@ include "includes/header.php";
                                         ?>
                                     </span>
                                 </td>
-                                <td>
+                            </tr>
+                        <?php endforeach; ?>
                                     <?php if ($isExpired): ?>
                                         <span class="status-badge status-expired">Expirado</span>
                                     <?php else: ?>
