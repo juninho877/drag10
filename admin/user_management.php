@@ -346,7 +346,6 @@ include "includes/header.php";
                                         if ($user['status'] === 'active') {
                                             echo 'Ativo';
                                         } elseif ($user['status'] === 'trial') {
-                                    <?php endif; ?>
                                             echo 'Inativo';
                                         }
                                         ?>
