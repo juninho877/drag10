@@ -6,8 +6,10 @@ if (!isset($_SESSION["usuario"]) || $_SESSION["role"] !== 'master') {
 }
 
 require_once 'classes/User.php';
+require_once 'classes/AdminSettings.php';
 
 $user = new User();
+$adminSettings = new AdminSettings();
 $message = '';
 $messageType = '';
 $masterId = $_SESSION['user_id'];
@@ -17,6 +19,7 @@ $adminUser = $user->getUserById(1);
 $logoChangeLimit = $adminUser ? $adminUser['logo_change_limit'] : 3;
 $movieLogoChangeLimit = $adminUser ? $adminUser['movie_logo_change_limit'] : 3;
 $backgroundChangeLimit = $adminUser ? $adminUser['background_change_limit'] : 3;
+$trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
 
 $masterCredits = $user->getUserCredits($masterId);
 
@@ -162,6 +165,7 @@ include "includes/header.php";
                             <option value="active" <?php echo ($_POST['status'] ?? 'active') === 'active' ? 'selected' : ''; ?>>Ativo</option>
                             <option value="inactive" <?php echo ($_POST['status'] ?? '') === 'inactive' ? 'selected' : ''; ?>>Inativo</option>
                            <option value="trial" <?php echo ($_POST['status'] ?? '') === 'trial' ? 'selected' : ''; ?>>Período de Teste</option>
+                           <p class="text-xs text-muted mt-1">Período de teste atual: <?php echo $trialDays; ?> dias</p>
                         </select>
                     </div>
 

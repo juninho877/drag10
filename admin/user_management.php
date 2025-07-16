@@ -9,6 +9,8 @@ require_once 'classes/User.php';
 require_once 'classes/CreditTransaction.php';
 
 $user = new User();
+require_once 'classes/AdminSettings.php';
+$adminSettings = new AdminSettings();
 $creditTransaction = new CreditTransaction();
 $db = Database::getInstance()->getConnection();
 
@@ -28,6 +30,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
     
     switch ($_POST['action']) {
+        case 'save_trial_days':
+            $trialDays = intval($_POST['trial_days']);
+            if ($trialDays < 1) $trialDays = 1;
+            if ($trialDays > 30) $trialDays = 30;
+            
+            $result = $adminSettings->setSetting('trial_days', $trialDays);
+            echo json_encode([
+                'success' => $result,
+                'message' => $result ? 'Configuração salva com sucesso' : 'Erro ao salvar configuração',
+                'trial_days' => $trialDays
+            ]);
+            exit;
+            
         case 'change_status':
             $result = $user->changeStatus($_POST['user_id'], $_POST['status']);
             echo json_encode($result);
@@ -94,6 +109,8 @@ if (!$globalLimits) {
     ];
 }
 
+$trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
+
 $pageTitle = "Gerenciamento de Usuários";
 include "includes/header.php";
 ?>
@@ -159,6 +176,32 @@ include "includes/header.php";
                 <div class="w-12 h-12 bg-warning-50 rounded-lg flex items-center justify-center">
                     <i class="fas fa-user-shield text-warning-500"></i>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trial Days Settings -->
+<div class="card mb-6">
+    <div class="card-header">
+        <h3 class="card-title">
+            <i class="fas fa-calendar-alt text-primary-500 mr-2"></i>
+            Configuração de Período de Teste
+        </h3>
+        <p class="card-subtitle">Defina o número de dias para o período de teste de novos usuários</p>
+    </div>
+    <div class="card-body">
+        <div class="flex items-center gap-4">
+            <div class="form-group mb-0 flex-1">
+                <label for="trial_days" class="form-label">Dias de Teste</label>
+                <input type="number" id="trial_days" class="form-input" value="<?php echo $trialDays; ?>" min="1" max="30">
+                <p class="text-xs text-muted mt-1">Número de dias que novos usuários terão acesso gratuito ao sistema</p>
+            </div>
+            <div>
+                <button id="saveTrialDaysBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i>
+                    Salvar Configuração
+                </button>
             </div>
         </div>
     </div>
@@ -1246,6 +1289,60 @@ document.addEventListener('DOMContentLoaded', function() {
     // Refresh Button
     document.getElementById('refreshBtn').addEventListener('click', function() {
         location.reload();
+    });
+    
+    // Trial Days Settings
+    document.getElementById('saveTrialDaysBtn').addEventListener('click', function() {
+        const trialDays = document.getElementById('trial_days').value;
+        
+        if (trialDays < 1 || trialDays > 30) {
+            Swal.fire({
+                title: 'Valor Inválido',
+                text: 'O número de dias deve estar entre 1 e 30',
+                icon: 'error',
+                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+            });
+            return;
+        }
+        
+        fetch('user_management.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=save_trial_days&trial_days=${trialDays}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Sucesso!',
+                    text: 'Configuração de dias de teste salva com sucesso',
+                    icon: 'success',
+                    background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                    color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                });
+            } else {
+                Swal.fire({
+                    title: 'Erro!',
+                    text: data.message,
+                    icon: 'error',
+                    background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                    color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Erro!',
+                text: 'Erro de comunicação com o servidor',
+                icon: 'error',
+                background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+                color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+            });
+        });
     });
     
     // Update Image Limits

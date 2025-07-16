@@ -6,6 +6,7 @@ session_start();
 require_once 'config/database.php';
 require_once 'classes/User.php';
 require_once 'classes/TelegramNotifier.php';
+require_once 'classes/AdminSettings.php';
 
 // Variáveis para o registro
 $registerError = "";
@@ -60,6 +61,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !isset($_POST["register_action"])) {
 
 // Processar formulário de registro
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
+    // Inicializar AdminSettings para obter o número de dias de teste
+    $adminSettings = new AdminSettings();
+    $trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
+    
     $newUsername = trim($_POST["new_username"]);
     $newEmail = trim($_POST["new_email"]);
     $newPassword = trim($_POST["new_password"]);
@@ -81,8 +86,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             'email' => $newEmail,
             'password' => $newPassword,
             'role' => 'user',
-            'status' => 'trial',
-            'expires_at' => date('Y-m-d', strtotime('+2 days'))
+            'status' => 'trial', 
+            'expires_at' => date('Y-m-d', strtotime("+{$trialDays} days"))
         ];
 
         // Verificar se o master_ref_id foi enviado e é válido
@@ -98,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
 
         $result = $user->createUser($userData);
         if ($result['success']) {
-            $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
+            $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de {$trialDays} dias. Faça login para começar.";
             
             // Enviar notificação via Telegram para o administrador e redirecionar
             $masterInfo = "";
