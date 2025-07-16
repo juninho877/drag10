@@ -82,7 +82,7 @@ if ($isTempUser) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - Painel' : 'Painel Administrativo'; ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -146,6 +146,7 @@ if ($isTempUser) {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -154,6 +155,9 @@ if ($isTempUser) {
             color: var(--text-primary);
             line-height: 1.6;
             transition: var(--transition);
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
         }
 
         /* Layout Structure */
@@ -585,7 +589,7 @@ if ($isTempUser) {
         @media (max-width: 1024px) {
             .sidebar {
                 transform: translateX(-100%);
-                z-index: 1002;
+                z-index: 1050;
                 height: 100vh;
                 height: 100dvh; /* Dynamic viewport height for mobile */
                 min-height: 100vh;
@@ -624,13 +628,24 @@ if ($isTempUser) {
             }
 
             .content-area {
-                padding: 1rem;
+                padding: 0.75rem;
+                overflow-x: hidden;
+                width: 100%;
             }
         }
 
         @media (max-width: 640px) {
             .sidebar-header {
                 padding: 1rem;
+            }
+            
+            .card {
+                border-radius: 8px;
+            }
+            
+            .card-header, 
+            .card-body {
+                padding: 0.75rem;
             }
 
             .sidebar-nav {
