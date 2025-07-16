@@ -65,6 +65,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
     $newPassword = trim($_POST["new_password"]);
     $confirmNewPassword = trim($_POST["confirm_new_password"]);
 
+    $user = new User();
+
     if (empty($newUsername) || empty($newEmail) || empty($newPassword) || empty($confirmNewPassword)) {
         $_SESSION['register_error'] = "Todos os campos são obrigatórios.";
     } elseif (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
@@ -93,7 +95,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["register_action"])) {
             }
         }
 
-        $user = new User();
         $result = $user->createUser($userData);
         if ($result['success']) {
             $_SESSION['register_success'] = "Sua conta foi criada com sucesso! Você tem um teste grátis de 2 dias. Faça login para começar.";
