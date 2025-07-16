@@ -789,7 +789,17 @@ include "includes/header.php";
                                     <span class="status-badge status-expired">Expirado</span>
                                 <?php else: ?>
                                     <span class="status-badge status-<?php echo $userData['status']; ?>">
-                                        <?php echo $userData['status'] === 'active' ? 'Ativo' : 'Inativo'; ?>
+                                        <?php 
+                                        if ($userData['status'] === 'active') {
+                                            echo 'Ativo';
+                                        } elseif ($userData['status'] === 'inactive') {
+                                            echo 'Inativo';
+                                        } elseif ($userData['status'] === 'trial') {
+                                            echo 'Teste';
+                                        } else {
+                                            echo ucfirst($userData['status']);
+                                        }
+                                        ?>
                                     </span>
                                 <?php endif; ?>
                             </div>
