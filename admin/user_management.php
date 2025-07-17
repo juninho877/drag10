@@ -11,11 +11,6 @@ require_once 'classes/CreditTransaction.php';
 
 $user = new User();
 require_once 'classes/AdminSettings.php';
-
-// Construir URL base para links de cadastro
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'];
-$baseUrl = $protocol . '://' . $host . dirname($_SERVER['REQUEST_URI']);
 require_once 'classes/MercadoPagoSettings.php';
 require_once 'classes/TelegramNotifier.php';
 
@@ -24,11 +19,8 @@ $adminSettings = new AdminSettings();
 $mercadoPagoSettings = new MercadoPagoSettings();
 $creditTransaction = new CreditTransaction();
 $db = Database::getInstance()->getConnection();
-// Obter configurações do Mercado Pago para o usuário administrador (ID 1)
-$adminMercadoPagoSettings = $mercadoPagoSettings->getSettings(1);
 
-// Verificar se o Mercado Pago está configurado
-$mercadoPagoConfigured = ($adminMercadoPagoSettings !== false && !empty($adminMercadoPagoSettings['access_token']));
+$mercadoPagoConfigured = ($adminSettings !== false && !empty($adminSettings['access_token']));
 
 $loggedInUserId = $_SESSION['user_id'];
 $loggedInUser = $user->getUserById($loggedInUserId);
@@ -932,79 +924,6 @@ include "includes/header.php";
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Função para mostrar o modal do link de cadastro do admin
-    window.showAdminRegistrationLinkModal = function() {
-        const adminId = <?php echo $_SESSION['user_id']; ?>;
-        const registrationLink = `${window.location.origin}${window.location.pathname.replace('/user_management.php', '/login.php')}?ref=${adminId}`;
-        
-        Swal.fire({
-            title: 'Link de Cadastro',
-            html: `
-                <div class="registration-link-modal">
-                    <p class="mb-4">Compartilhe este link para que novos usuários se cadastrem através de você:</p>
-                    <div class="input-group">
-                        <input type="text" id="registrationLinkInput" class="form-input" value="${registrationLink}" readonly>
-                        <button type="button" class="btn btn-secondary" id="copyLinkBtn">
-                            <i class="fas fa-copy"></i>
-                            Copiar
-                        </button>
-                    </div>
-                    <p class="mt-3 text-sm text-muted">
-                        <i class="fas fa-info-circle"></i>
-                        Usuários que se cadastrarem através deste link serão associados à sua conta.
-                    </p>
-                </div>
-            `,
-            showConfirmButton: false,
-            showCancelButton: true,
-            cancelButtonText: 'Fechar',
-            width: '600px',
-            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
-            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
-            didOpen: () => {
-                // Adicionar funcionalidade de copiar
-                const copyBtn = document.getElementById('copyLinkBtn');
-                const linkInput = document.getElementById('registrationLinkInput');
-                
-                copyBtn.addEventListener('click', function() {
-                    linkInput.select();
-                    linkInput.setSelectionRange(0, 99999); // Para dispositivos móveis
-                    
-                    navigator.clipboard.writeText(linkInput.value).then(() => {
-                        // Feedback visual
-                        const originalText = this.innerHTML;
-                        this.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-                        this.classList.remove('btn-secondary');
-                        this.classList.add('btn-success');
-                        
-                        setTimeout(() => {
-                            this.innerHTML = originalText;
-                            this.classList.remove('btn-success');
-                            this.classList.add('btn-secondary');
-                        }, 2000);
-                    }).catch(() => {
-                        // Fallback para navegadores mais antigos
-                        try {
-                            document.execCommand('copy');
-                            const originalText = this.innerHTML;
-                            this.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-                            this.classList.remove('btn-secondary');
-                            this.classList.add('btn-success');
-                            
-                            setTimeout(() => {
-                                this.innerHTML = originalText;
-                                this.classList.remove('btn-success');
-                                this.classList.add('btn-secondary');
-                            }, 2000);
-                        } catch (err) {
-                            alert('Erro ao copiar. Selecione o texto manualmente.');
-                        }
-                    });
-                });
-            }
-        });
-    };
-    
     
     // Criar usuário de teste
     document.getElementById('createTrialUserBtn').addEventListener('click', function() {
@@ -1732,92 +1651,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
-
-// Estilos para o modal
-const modalStyles = document.createElement('style');
-modalStyles.textContent = `
-    .registration-link-modal {
-        text-align: left;
-    }
-    
-    .input-group {
-        display: flex;
-        gap: 0.5rem;
-        align-items: stretch;
-    }
-    
-    .input-group .form-input {
-        flex: 1;
-        font-family: monospace;
-        font-size: 0.875rem;
-        background: var(--bg-secondary);
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius-sm);
-        padding: 0.75rem;
-        color: var(--text-primary);
-    }
-    
-    .input-group .btn {
-        padding: 0.75rem 1rem;
-        border-radius: var(--border-radius-sm);
-        font-size: 0.875rem;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        white-space: nowrap;
-    }
-    
-    .input-group .btn-secondary {
-        background: var(--bg-tertiary);
-        color: var(--text-primary);
-        border: 1px solid var(--border-color);
-    }
-    
-    .input-group .btn-secondary:hover {
-        background: var(--bg-secondary);
-    }
-    
-    .input-group .btn-success {
-        background: var(--success-500);
-        color: white;
-    }
-    
-    .input-group .btn-success:hover {
-        background: var(--success-600);
-    }
-    
-    .mb-4 {
-        margin-bottom: 1rem;
-    }
-    
-    .mt-3 {
-        margin-top: 0.75rem;
-    }
-    
-    .text-sm {
-        font-size: 0.875rem;
-    }
-    
-    .text-muted {
-        color: var(--text-muted);
-    }
-    
-    /* Dark theme adjustments */
-    [data-theme="dark"] .input-group .form-input {
-        background: var(--bg-tertiary);
-        color: var(--text-primary);
-    }
-    
-    [data-theme="dark"] .input-group .btn-secondary {
-        background: var(--bg-secondary);
-        color: var(--text-primary);
-    }
-`;
-document.head.appendChild(modalStyles);
 
 // Função para copiar o link de cadastro
 function copyRegistrationLink(link) {
