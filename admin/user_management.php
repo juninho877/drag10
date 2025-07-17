@@ -19,8 +19,11 @@ $adminSettings = new AdminSettings();
 $mercadoPagoSettings = new MercadoPagoSettings();
 $creditTransaction = new CreditTransaction();
 $db = Database::getInstance()->getConnection();
-$trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
-$mercadoPagoConfigured = ($adminSettings !== false && !empty($adminSettings['access_token']));
+// Obter configurações do Mercado Pago para o usuário administrador (ID 1)
+$adminMercadoPagoSettings = $mercadoPagoSettings->getSettings(1);
+
+// Verificar se o Mercado Pago está configurado
+$mercadoPagoConfigured = ($adminMercadoPagoSettings !== false && !empty($adminMercadoPagoSettings['access_token']));
 
 $loggedInUserId = $_SESSION['user_id'];
 $loggedInUser = $user->getUserById($loggedInUserId);
