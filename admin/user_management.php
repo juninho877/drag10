@@ -19,7 +19,7 @@ $adminSettings = new AdminSettings();
 $mercadoPagoSettings = new MercadoPagoSettings();
 $creditTransaction = new CreditTransaction();
 $db = Database::getInstance()->getConnection();
-
+$trialDays = intval($adminSettings->getSetting('trial_days', 2)); // Padrão: 2 dias
 $mercadoPagoConfigured = ($adminSettings !== false && !empty($adminSettings['access_token']));
 
 $loggedInUserId = $_SESSION['user_id'];
