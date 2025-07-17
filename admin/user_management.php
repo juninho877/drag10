@@ -11,9 +11,20 @@ require_once 'classes/CreditTransaction.php';
 
 $user = new User();
 require_once 'classes/AdminSettings.php';
+require_once 'classes/MercadoPagoSettings.php';
+require_once 'classes/TelegramNotifier.php';
+
+$user = new User();
 $adminSettings = new AdminSettings();
+$mercadoPagoSettings = new MercadoPagoSettings();
 $creditTransaction = new CreditTransaction();
 $db = Database::getInstance()->getConnection();
+
+$mercadoPagoConfigured = ($adminSettings !== false && !empty($adminSettings['access_token']));
+
+$loggedInUserId = $_SESSION['user_id'];
+$loggedInUser = $user->getUserById($loggedInUserId);
+$adminRegistrationLink = 'login.php?ref=' . $loggedInUserId;
 
 // Processar filtros
 $filters = [
@@ -559,10 +570,15 @@ include "includes/header.php";
             <i class="fas fa-plus"></i>
             Adicionar Usuário
         </a>
+        <button class="btn btn-secondary" onclick="copyRegistrationLink('<?php echo $adminRegistrationLink; ?>')">
+            <i class="fas fa-link"></i>
+            Meu Link de Cadastro
+        </button>
         <button id="createTrialUserBtn" class="btn btn-warning">
             <i class="fas fa-user-clock"></i>
             Criar Teste
         </button>
+
     </div>
 </div>
 
@@ -1635,6 +1651,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Função para copiar o link de cadastro
+function copyRegistrationLink(link) {
+    navigator.clipboard.writeText(link).then(() => {
+        Swal.fire({
+            title: 'Link Copiado!',
+            text: 'Seu link de cadastro foi copiado para a área de transferência.',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+        });
+    }).catch(err => {
+        console.error('Erro ao copiar o link: ', err);
+        Swal.fire({
+            title: 'Erro!',
+            text: 'Não foi possível copiar o link. Por favor, tente novamente.',
+            icon: 'error',
+            background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+            color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b'
+        });
+    });
+}
 </script>
 
 
