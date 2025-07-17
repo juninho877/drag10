@@ -11,6 +11,11 @@ require_once 'classes/CreditTransaction.php';
 
 $user = new User();
 require_once 'classes/AdminSettings.php';
+
+// Construir URL base para links de cadastro
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+$baseUrl = $protocol . '://' . $host . dirname($_SERVER['REQUEST_URI']);
 require_once 'classes/MercadoPagoSettings.php';
 require_once 'classes/TelegramNotifier.php';
 
