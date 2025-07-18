@@ -6,6 +6,9 @@ if (!isset($_SESSION["usuario"]) || $_SESSION["role"] !== 'admin') {
     exit();
 }
 
+// VARIÁVEL ADICIONADA AQUI
+$adminId = $_SESSION['user_id'];
+
 require_once 'classes/User.php';
 require_once 'classes/CreditTransaction.php';
 
@@ -347,6 +350,14 @@ include "includes/header.php";
     [data-theme="dark"] .btn-secondary { background: var(--bg-tertiary); color: var(--text-muted); }
     [data-theme="dark"] .trial-info { background: rgba(51, 65, 85, 0.5); }
     [data-theme="dark"] .credential-value-container code { background: rgba(51, 65, 85, 0.8); color: var(--primary-400); }
+
+.swal2-html-container .form-input {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
 </style>
 
 
@@ -555,6 +566,10 @@ include "includes/header.php";
         </button>
     </div>
     <div class="flex gap-3">
+        <button id="showReferralLinkBtn" class="btn btn-success">
+            <i class="fas fa-link"></i>
+            Link de Cadastro
+        </button>
         <a href="add_user.php" class="btn btn-primary">
             <i class="fas fa-plus"></i>
             Adicionar Usuário
@@ -908,43 +923,109 @@ include "includes/header.php";
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+
+        
+   document.getElementById('showReferralLinkBtn').addEventListener('click', () => {
+	   const adminId = <?php echo $adminId; ?>;
+        const baseUrl = window.location.origin + '/admin/login.php?ref=' + adminId;
+    Swal.fire({
+      title: 'Link de Cadastro',
+      html: `
+        <p class="mb-4">Compartilhe este link para que novos usuários sejam vinculados à sua conta:</p>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;" id="responsiveCopyContainer">
+  <input type="text" id="referralLink" value="${baseUrl}" class="form-input" style="width: 100%;" readonly>
+  <button type="button" id="copyLinkBtn" class="btn btn-primary" style="width: 100%;">
+    <i class="fas fa-copy"></i>
+  </button>
+</div> 
+        <p class="text-sm text-muted">Quando um usuário se cadastrar através deste link, ele será automaticamente vinculado à sua conta.</p>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: 'Fechar',
+      background: document.body.getAttribute('data-theme') === 'dark' ? '#1e293b' : '#ffffff',
+      color: document.body.getAttribute('data-theme') === 'dark' ? '#f1f5f9' : '#1e293b',
+      didOpen: () => {
+        const copyBtn = document.getElementById('copyLinkBtn');
+        const linkInput = document.getElementById('referralLink');
+
+        copyBtn.addEventListener('click', function () {
+          const linkToCopy = linkInput.value;
+
+          if (!navigator.clipboard) {
+            linkInput.select();
+            document.execCommand('copy');
+            showToast('Link copiado!');
+            this.innerHTML = '<i class="fas fa-check"></i>';
+            resetIcon(this);
+            return;
+          }
+
+          navigator.clipboard.writeText(linkToCopy).then(() => {
+            this.innerHTML = '<i class="fas fa-check"></i>';
+            showToast('Link copiado com sucesso!');
+            resetIcon(this);
+          }).catch(err => {
+            console.error('Erro ao copiar:', err);
+            Swal.fire({ icon: 'error', title: 'Oops...', text: 'Não foi possível copiar o link.' });
+          });
+        }, { once: true });
+
+        function showToast(message) {
+          const toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true
+          });
+          toast.fire({ icon: 'success', title: message });
+        }
+
+        function resetIcon(button) {
+          setTimeout(() => {
+            button.innerHTML = '<i class="fas fa-copy"></i>';
+          }, 2000);
+        }
+      }
+    });
+  });
     
     // Criar usuário de teste
     document.getElementById('createTrialUserBtn').addEventListener('click', function() {
         Swal.fire({
             title: 'Criar Usuário de Teste',
             html: `<div class="trial-user-form">
-                       <div class="trial-form-group">
-                           <label for="trial_username">
-                               <i class="fas fa-user"></i>
-                               Nome de Usuário
-                           </label>
-                           <input type="text" id="trial_username" placeholder="Digite o nome de usuário" required>
-                       </div>
-                       <div class="trial-form-group">
-                           <label for="trial_email">
-                               <i class="fas fa-envelope"></i>
-                               Email
-                           </label>
-                           <input type="email" id="trial_email" placeholder="Digite o email" required>
-                       </div>
-                       <div class="trial-form-group">
-                           <label for="trial_password">
-                               <i class="fas fa-lock"></i>
-                               Senha
-                           </label>
-                           <div class="password-input-wrapper">
-                               <input type="password" id="trial_password" placeholder="Mínimo de 6 caracteres" required>
-                               <button type="button" class="toggle-password" onclick="togglePasswordVisibility('trial_password')">
-                                   <i class="fas fa-eye"></i>
-                               </button>
-                           </div>
-                       </div>
-                       <div class="trial-info">
-                           <i class="fas fa-info-circle"></i>
-                           <span>O usuário terá acesso por <strong>${<?php echo $trialDays; ?>}</strong> dias de teste</span>
-                       </div>
-                   </div>`,
+                        <div class="trial-form-group">
+                            <label for="trial_username">
+                                <i class="fas fa-user"></i>
+                                Nome de Usuário
+                            </label>
+                            <input type="text" id="trial_username" placeholder="Digite o nome de usuário" required>
+                        </div>
+                        <div class="trial-form-group">
+                            <label for="trial_email">
+                                <i class="fas fa-envelope"></i>
+                                Email
+                            </label>
+                            <input type="email" id="trial_email" placeholder="Digite o email" required>
+                        </div>
+                        <div class="trial-form-group">
+                            <label for="trial_password">
+                                <i class="fas fa-lock"></i>
+                                Senha
+                            </label>
+                            <div class="password-input-wrapper">
+                                <input type="password" id="trial_password" placeholder="Mínimo de 6 caracteres" required>
+                                <button type="button" class="toggle-password" onclick="togglePasswordVisibility('trial_password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="trial-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>O usuário terá acesso por <strong>${<?php echo $trialDays; ?>}</strong> dias de teste</span>
+                        </div>
+                    </div>`,
             showCancelButton: true,
             confirmButtonText: 'Criar',
             cancelButtonText: 'Cancelar',
@@ -994,40 +1075,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         Swal.fire({
                             title: 'Usuário Criado!',
                             html: `<div class="credentials-container">
-                                       <div class="credentials-header">
-                                           <i class="fas fa-check-circle"></i>
-                                           <h3>Usuário de teste criado com sucesso!</h3>
-                                       </div>
-                                       <div class="credentials-body">
-                                           <div class="credential-item">
-                                               <span class="credential-label">Usuário:</span>
-                                               <div class="credential-value-container">
-                                                   <code>${username}</code>
-                                               </div>
-                                           </div>
-                                           <div class="credential-item">
-                                               <span class="credential-label">Email:</span>
-                                               <div class="credential-value-container">
-                                                   <code>${email}</code>
-                                               </div>
-                                           </div>
-                                           <div class="credential-item">
-                                               <span class="credential-label">Senha:</span>
-                                               <div class="credential-value-container">
-                                                   <code>${password}</code>
-                                               </div>
-                                           </div>
-                                           <div class="credential-item">
-                                               <span class="credential-label">Validade:</span>
-                                               <div class="credential-value-container">
-                                                   <code>${<?php echo $trialDays; ?>} dias</code>
-                                               </div>
-                                           </div>
-                                       </div>
-                                       <div class="credentials-footer">
-                                           <p>Copie estas informações para compartilhar com o usuário.</p>
-                                       </div>
-                                   </div>`,
+                                        <div class="credentials-header">
+                                            <i class="fas fa-check-circle"></i>
+                                            <h3>Usuário de teste criado com sucesso!</h3>
+                                        </div>
+                                        <div class="credentials-body">
+                                            <div class="credential-item">
+                                                <span class="credential-label">Usuário:</span>
+                                                <div class="credential-value-container">
+                                                    <code>${username}</code>
+                                                </div>
+                                            </div>
+                                            <div class="credential-item">
+                                                <span class="credential-label">Email:</span>
+                                                <div class="credential-value-container">
+                                                    <code>${email}</code>
+                                                </div>
+                                            </div>
+                                            <div class="credential-item">
+                                                <span class="credential-label">Senha:</span>
+                                                <div class="credential-value-container">
+                                                    <code>${password}</code>
+                                                </div>
+                                            </div>
+                                            <div class="credential-item">
+                                                <span class="credential-label">Validade:</span>
+                                                <div class="credential-value-container">
+                                                    <code>${<?php echo $trialDays; ?>} dias</code>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="credentials-footer">
+                                            <p>Copie estas informações para compartilhar com o usuário.</p>
+                                        </div>
+                                    </div>`,
                             icon: 'success',
                             confirmButtonText: 'Copiar Credenciais',
                             customClass: {
