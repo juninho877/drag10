@@ -702,7 +702,8 @@ if (isset($_SESSION['register_error'])) {
                         </div>
                     <?php endif; ?>
                 </form>
-               
+                
+            </div>
             
             <div class="login-form" id="registerFormContainer">
                 <div class="welcome-text">
