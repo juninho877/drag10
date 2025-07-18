@@ -702,10 +702,7 @@ if (isset($_SESSION['register_error'])) {
                         </div>
                     <?php endif; ?>
                 </form>
-                <div class="text-center mt-4">
-                    <a href="#" id="showRegisterForm" class="toggle-link">Não tem uma conta? Cadastre-se!</a>
-                </div>
-            </div>
+               
             
             <div class="login-form" id="registerFormContainer">
                 <div class="welcome-text">
